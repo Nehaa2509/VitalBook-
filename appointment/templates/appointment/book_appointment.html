@@ -1,0 +1,168 @@
+﻿{% extends 'appointment/base.html' %}
+
+{% block title %}Book Appointment - VITALBOOK{% endblock %}
+
+{% block content %}
+<section class="booking-section">
+    <div class="container">
+        <div class="booking-wrapper">
+            <div class="doctor-summary-card">
+                <h3>Appointment With</h3>
+                <div class="doctor-summary">
+                    <img src="https://ui-avatars.com/api/?name={{ doctor.name }}&size=100&background=4A90E2&color=fff" alt="{{ doctor.name }}">
+                    <div>
+                        <h2>Dr. {{ doctor.name }}</h2>
+                        <p class="specialization">{{ doctor.specialization.name }}</p>
+                        <p class="qualification">{{ doctor.qualification }}</p>
+                        <div class="doctor-meta-small">
+                            <span><i class="fas fa-star"></i> {{ doctor.rating }}</span>
+                            <span><i class="fas fa-briefcase"></i> {{ doctor.experience_years }} years</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="appointment-info">
+                    <h4>Consultation Details</h4>
+                    <div class="info-item">
+                        <i class="fas fa-rupee-sign"></i>
+                        <div>
+                            <span class="label">Consultation Fee</span>
+                            <span class="value">₹{{ doctor.consultation_fee }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-calendar"></i>
+                        <div>
+                            <span class="label">Available Days</span>
+                            <span class="value">{{ doctor.available_days }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <span class="label">Available Time</span>
+                            <span class="value">{{ doctor.available_time }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="booking-form-card">
+                <h2>Book Your Appointment</h2>
+                <p class="form-subtitle">Select your preferred date and time</p>
+                
+                <form method="POST" id="bookingForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> Appointment Date *</label>
+                        <input type="date" name="date" id="appointmentDate" required min="{{ today }}">
+                        <small>Select a date for your appointment</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Appointment Time *</label>
+                        <select name="time" id="appointmentTime" required>
+                            <option value="">Select Time</option>
+                            <option value="09:00:00">09:00 AM</option>
+                            <option value="09:30:00">09:30 AM</option>
+                            <option value="10:00:00">10:00 AM</option>
+                            <option value="10:30:00">10:30 AM</option>
+                            <option value="11:00:00">11:00 AM</option>
+                            <option value="11:30:00">11:30 AM</option>
+                            <option value="12:00:00">12:00 PM</option>
+                            <option value="14:00:00">02:00 PM</option>
+                            <option value="14:30:00">02:30 PM</option>
+                            <option value="15:00:00">03:00 PM</option>
+                            <option value="15:30:00">03:30 PM</option>
+                            <option value="16:00:00">04:00 PM</option>
+                            <option value="16:30:00">04:30 PM</option>
+                            <option value="17:00:00">05:00 PM</option>
+                        </select>
+                        <small>Choose an available time slot</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-notes-medical"></i> Reason for Visit *</label>
+                        <textarea name="reason" rows="3" required placeholder="Brief description of your health concern"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-heartbeat"></i> Symptoms</label>
+                        <textarea name="symptoms" rows="3" placeholder="Describe your symptoms (optional)"></textarea>
+                    </div>
+                    
+                    <div class="booking-summary">
+                        <h4>Booking Summary</h4>
+                        <div class="summary-item">
+                            <span>Doctor:</span>
+                            <span>Dr. {{ doctor.name }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Specialization:</span>
+                            <span>{{ doctor.specialization.name }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Consultation Fee:</span>
+                            <span class="fee">₹{{ doctor.consultation_fee }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <a href="{% url 'doctor_list' %}" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Confirm Booking
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const bookedSlots = {{ booked_slots|safe }};
+
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    const date = document.getElementById('appointmentDate').value;
+    const time = document.getElementById('appointmentTime').value;
+    
+    // Check if slot is booked
+    const isBooked = bookedSlots.some(slot => slot[0] === date && slot[1] === time);
+    
+    if (isBooked) {
+        e.preventDefault();
+        alert('This time slot is already booked. Please select another time.');
+        return false;
+    }
+    
+    if (!confirm('Are you sure you want to book this appointment?')) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+// Disable booked time slots when date changes
+document.getElementById('appointmentDate').addEventListener('change', function() {
+    const selectedDate = this.value;
+    const timeSelect = document.getElementById('appointmentTime');
+    const options = timeSelect.querySelectorAll('option');
+    
+    options.forEach(option => {
+        if (option.value) {
+            const isBooked = bookedSlots.some(slot => 
+                slot[0] === selectedDate && slot[1] === option.value
+            );
+            option.disabled = isBooked;
+            if (isBooked) {
+                option.textContent = option.textContent.replace(' (Booked)', '') + ' (Booked)';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

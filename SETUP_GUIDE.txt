@@ -1,0 +1,119 @@
+========================================
+HOSPITAL MANAGEMENT SYSTEM
+SETUP & USAGE GUIDE
+========================================
+
+QUICK START
+-----------
+
+1. Activate Virtual Environment:
+   .\activate.ps1
+
+2. Start Server:
+   .\start_server.ps1
+   
+   OR manually:
+   python manage.py runserver
+
+3. Open Browser:
+   http://127.0.0.1:8000/
+
+========================================
+LOGIN CREDENTIALS
+========================================
+
+Admin Panel (http://127.0.0.1:8000/admin/):
+  Username: admin
+  Password: admin123
+
+Patient Login (http://127.0.0.1:8000/login/):
+  Username: john_doe, jane_smith, or bob_wilson
+  Password: password123
+
+========================================
+COMMON COMMANDS
+========================================
+
+Activate Virtual Environment:
+  .\venv\Scripts\Activate.ps1
+
+Start Server:
+  python manage.py runserver
+
+Populate Database:
+  python manage.py populate_data
+
+Create Superuser:
+  python manage.py createsuperuser
+
+Run Migrations:
+  python manage.py makemigrations
+  python manage.py migrate
+
+========================================
+PROJECT STRUCTURE
+========================================
+
+hospital/
+├── venv/                 # Virtual environment
+├── appointment/          # Main app
+│   ├── models.py        # Database models
+│   ├── views.py         # Views
+│   ├── templates/       # HTML files
+│   └── static/          # CSS, JS
+├── hospital_project/    # Settings
+├── db.sqlite3          # Database
+├── manage.py           # Django CLI
+└── requirements.txt    # Dependencies
+
+========================================
+DATABASE CONTENT
+========================================
+
+✓ 5 Specializations (Cardiology, Neurology, etc.)
+✓ 5 Doctors (with profiles and ratings)
+✓ 3 Patients (with user accounts)
+✓ 4 Appointments (various statuses)
+
+========================================
+TROUBLESHOOTING
+========================================
+
+If server won't start:
+1. Make sure virtual environment is activated
+2. Check if port 8000 is available
+3. Run: python manage.py migrate
+
+If login doesn't work:
+1. Use credentials above
+2. Check database exists (db.sqlite3)
+3. Run: python manage.py populate_data
+
+========================================
+FEATURES
+========================================
+
+For Patients:
+✓ Register and login
+✓ Browse doctors by specialization
+✓ Book appointments
+✓ View appointment history
+✓ Cancel/reschedule appointments
+✓ Add reviews
+
+For Admin:
+✓ Manage doctors
+✓ Manage patients
+✓ Manage appointments
+✓ View contact messages
+✓ Manage specializations
+
+========================================
+SUPPORT
+========================================
+
+Check README.md for detailed documentation
+Visit http://127.0.0.1:8000/admin/ for admin panel
+All data is stored in db.sqlite3
+
+========================================

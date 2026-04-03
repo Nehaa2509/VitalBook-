@@ -1,0 +1,49 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<h2>Welcome to VitalBook! 👋</h2>
+
+<p>Dear {{ patient.name }},</p>
+
+<p>Thank you for registering with VitalBook! Your account has been created successfully.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">👤 Name</span>
+        <span class="info-value">{{ patient.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📧 Email</span>
+        <span class="info-value">{{ user.email }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">👤 Username</span>
+        <span class="info-value">{{ user.username }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📅 Registration Date</span>
+        <span class="info-value">{{ user.date_joined|date:"F j, Y" }}</span>
+    </div>
+</div>
+
+<div class="highlight-box" style="background: #e7f1ff; border-left-color: #0d6efd;">
+    <strong style="color: #0d6efd;">🎉 What's Next?</strong>
+    <ul style="margin: 8px 0; padding-left: 20px; color: #495057;">
+        <li>Browse our list of qualified doctors</li>
+        <li>Book appointments with ease</li>
+        <li>Manage your health records</li>
+        <li>Get appointment reminders</li>
+        <li>Leave reviews for doctors</li>
+    </ul>
+</div>
+
+<p style="text-align: center;">
+    <a href="http://127.0.0.1:8000/doctors/" class="btn">
+        Find a Doctor →
+    </a>
+</p>
+
+<p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
+
+<p>We're excited to have you on board!</p>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<h2>Appointment Cancelled by Patient 📋</h2>
+
+<p>Dear Dr. {{ appointment.doctor.name }},</p>
+
+<p>A patient has cancelled their appointment with you. Here are the details:</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">👤 Patient</span>
+        <span class="info-value">{{ appointment.patient.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📅 Appointment Date</span>
+        <span class="info-value">{{ appointment.date|date:"l, F j, Y" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">⏰ Time</span>
+        <span class="info-value">{{ appointment.time|time:"h:i A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📋 Booking ID</span>
+        <span class="info-value">VB-{{ appointment.id }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📝 Reason</span>
+        <span class="info-value">{{ appointment.reason|default:"Not specified" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value">
+            <span class="status-badge status-cancelled">❌ Cancelled</span>
+        </span>
+    </div>
+</div>
+
+<div class="highlight-box">
+    <strong>💡 Note:</strong> This time slot is now available for other patients to book.
+</div>
+
+<p style="text-align: center;">
+    <a href="http://127.0.0.1:8000/doctor/dashboard/" class="btn">
+        View Dashboard →
+    </a>
+</p>
+
+<p>You can view your updated schedule in your doctor dashboard.</p>
+{% endblock %}

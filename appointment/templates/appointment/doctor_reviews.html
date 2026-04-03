@@ -1,0 +1,337 @@
+{% extends 'appointment/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Reviews - Dr. {{ doctor.name }} - VitalBook{% endblock %}
+
+{% block extra_css %}
+<style>
+.reviews-page {
+    padding: 40px 0;
+    background: #f8f9fa;
+}
+
+.reviews-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.doctor-header {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.doctor-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.doctor-info h1 {
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+.doctor-spec {
+    color: #0d6efd;
+    font-size: 16px;
+}
+
+.rating-summary {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.rating-overview {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.overall-rating {
+    text-align: center;
+}
+
+.rating-number {
+    font-size: 48px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.rating-stars-large {
+    display: inline-flex;
+    gap: 4px;
+    color: #ffc107;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.total-reviews {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.rating-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rating-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.rating-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 80px;
+    font-size: 14px;
+    color: #495057;
+}
+
+.rating-label .star-rating {
+    display: inline-flex;
+    gap: 2px;
+    color: #ffc107;
+    font-size: 14px;
+}
+
+.progress-bar-container {
+    flex: 1;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #ffc107;
+    transition: width 0.3s ease;
+}
+
+.rating-percentage {
+    min-width: 50px;
+    text-align: right;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.reviews-list {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.reviews-list h2 {
+    font-size: 24px;
+    margin-bottom: 25px;
+}
+
+.review-card {
+    padding: 25px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.review-card:last-child {
+    border-bottom: none;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+
+.reviewer-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.reviewer-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #0d6efd;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.reviewer-details h4 {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.review-rating {
+    display: inline-flex;
+    gap: 2px;
+    color: #ffc107;
+    font-size: 14px;
+}
+
+.review-date {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.review-comment {
+    color: #495057;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.no-reviews i {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+    .rating-overview {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .doctor-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reviews-page">
+    <div class="reviews-container">
+        <!-- Doctor Header -->
+        <div class="doctor-header">
+            <img src="https://ui-avatars.com/api/?name={{ doctor.name }}&size=100&background=0d6efd&color=fff" 
+                 alt="{{ doctor.name }}" class="doctor-photo">
+            <div class="doctor-info">
+                <h1>Dr. {{ doctor.name }}</h1>
+                <div class="doctor-spec">{{ doctor.specialization.name }}</div>
+            </div>
+        </div>
+        
+        <!-- Rating Summary -->
+        <div class="rating-summary">
+            <div class="rating-overview">
+                <div class="overall-rating">
+                    <div class="rating-number">{{ avg_rating|floatformat:1 }}</div>
+                    <div class="rating-stars-large">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="total-reviews">{{ total_reviews }} review{{ total_reviews|pluralize }}</div>
+                </div>
+                
+                <div class="rating-bars">
+                    {% for rating in "54321" %}
+                        <div class="rating-bar-row">
+                            <div class="rating-label">
+                                <span class="star-rating">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= rating|add:"0" %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: {{ rating_percentages|get_item:rating|add:"0" }}%"></div>
+                            </div>
+                            <div class="rating-percentage">{{ rating_percentages|get_item:rating|add:"0"|floatformat:0 }}%</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reviews List -->
+        <div class="reviews-list">
+            <h2>Patient Reviews</h2>
+            
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">
+                                    {{ review.patient.name|first|upper }}
+                                </div>
+                                <div class="reviewer-details">
+                                    <h4>{{ review.patient.name }}</h4>
+                                    <div class="review-rating">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="review-date">
+                                <i class="fas fa-calendar"></i> {{ review.created_at|timesince }} ago
+                            </div>
+                        </div>
+                        {% if review.comment %}
+                            <div class="review-comment">
+                                "{{ review.comment }}"
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-reviews">
+                    <i class="fas fa-comments"></i>
+                    <h3>No Reviews Yet</h3>
+                    <p>Be the first to review Dr. {{ doctor.name }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Custom template filter for dictionary access
+document.addEventListener('DOMContentLoaded', function() {
+    // Any additional JavaScript can go here
+});
+</script>
+{% endblock %}

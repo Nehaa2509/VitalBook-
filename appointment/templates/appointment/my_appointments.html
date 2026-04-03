@@ -1,0 +1,145 @@
+﻿{% extends 'appointment/base.html' %}
+
+{% block title %}My Appointments - VITALBOOK{% endblock %}
+
+{% block content %}
+<section class="appointments-section">
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-calendar-check"></i> My Appointments</h1>
+            <a href="{% url 'doctor_list' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Book New Appointment
+            </a>
+        </div>
+        
+        <div class="appointments-filter">
+            <a href="?status=all" class="filter-btn {% if status_filter == 'all' %}active{% endif %}">
+                All
+            </a>
+            <a href="?status=Pending" class="filter-btn {% if status_filter == 'Pending' %}active{% endif %}">
+                Pending
+            </a>
+            <a href="?status=Confirmed" class="filter-btn {% if status_filter == 'Confirmed' %}active{% endif %}">
+                Confirmed
+            </a>
+            <a href="?status=Completed" class="filter-btn {% if status_filter == 'Completed' %}active{% endif %}">
+                Completed
+            </a>
+            <a href="?status=Cancelled" class="filter-btn {% if status_filter == 'Cancelled' %}active{% endif %}">
+                Cancelled
+            </a>
+        </div>
+        
+        {% if upcoming_appointments %}
+        <div class="appointments-group">
+            <h2 class="group-title"><i class="fas fa-clock"></i> Upcoming Appointments</h2>
+            <div class="appointments-grid">
+                {% for appointment in upcoming_appointments %}
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <div class="appointment-date">
+                            <div class="date-box">
+                                <span class="day">{{ appointment.date|date:"d" }}</span>
+                                <span class="month">{{ appointment.date|date:"M" }}</span>
+                            </div>
+                        </div>
+                        <div class="appointment-info">
+                            <h3>Dr. {{ appointment.doctor.name }}</h3>
+                            <p class="specialization">{{ appointment.doctor.specialization.name }}</p>
+                            <p class="time"><i class="fas fa-clock"></i> {{ appointment.time|time:"h:i A" }}</p>
+                        </div>
+                        <span class="status-badge status-{{ appointment.status|lower }}">
+                            {{ appointment.status }}
+                        </span>
+                    </div>
+                    
+                    <div class="appointment-body">
+                        <p class="reason"><strong>Reason:</strong> {{ appointment.reason|truncatewords:15 }}</p>
+                        {% if appointment.symptoms %}
+                            <p class="symptoms"><strong>Symptoms:</strong> {{ appointment.symptoms|truncatewords:15 }}</p>
+                        {% endif %}
+                        {% if appointment.qr_code %}
+                        <div class="qr-code-section" style="margin-top: 10px; text-align: center;">
+                            <p><strong>Check-in QR:</strong></p>
+                            <img src="{{ appointment.qr_code.url }}" alt="QR Code" width="80" style="border-radius: 8px; border: 1px solid #ccc; padding: 5px; background: #fff;">
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="appointment-footer">
+                        <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                        {% if appointment.status in 'Pending,Confirmed' %}
+                            <a href="{% url 'reschedule_appointment' appointment.id %}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-calendar-alt"></i> Reschedule
+                            </a>
+                            <a href="{% url 'cancel_appointment' appointment.id %}" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Cancel this appointment? Note: Cancellations made after 24 hours of booking will incur a ₹500 cancellation fee.')">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if past_appointments %}
+        <div class="appointments-group">
+            <h2 class="group-title"><i class="fas fa-history"></i> Past Appointments</h2>
+            <div class="appointments-grid">
+                {% for appointment in past_appointments %}
+                <div class="appointment-card past">
+                    <div class="appointment-header">
+                        <div class="appointment-date">
+                            <div class="date-box">
+                                <span class="day">{{ appointment.date|date:"d" }}</span>
+                                <span class="month">{{ appointment.date|date:"M" }}</span>
+                            </div>
+                        </div>
+                        <div class="appointment-info">
+                            <h3>Dr. {{ appointment.doctor.name }}</h3>
+                            <p class="specialization">{{ appointment.doctor.specialization.name }}</p>
+                            <p class="time"><i class="fas fa-clock"></i> {{ appointment.time|time:"h:i A" }}</p>
+                        </div>
+                        <span class="status-badge status-{{ appointment.status|lower }}">
+                            {{ appointment.status }}
+                        </span>
+                    </div>
+                    
+                    <div class="appointment-body">
+                        <p class="reason"><strong>Reason:</strong> {{ appointment.reason|truncatewords:15 }}</p>
+                    </div>
+                    
+                    <div class="appointment-footer">
+                        <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                        {% if appointment.status == 'Completed' and not appointment.review %}
+                            <a href="{% url 'add_review' appointment.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-star"></i> Add Review
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if not upcoming_appointments and not past_appointments %}
+        <div class="no-appointments">
+            <i class="fas fa-calendar-times"></i>
+            <h3>No Appointments Found</h3>
+            <p>You haven't booked any appointments yet.</p>
+            <a href="{% url 'doctor_list' %}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus"></i> Book Your First Appointment
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

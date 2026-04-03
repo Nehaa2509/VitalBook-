@@ -1,0 +1,48 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<h2>Thank You for Your Review! ⭐</h2>
+
+<p>Dear {{ review.patient.name }},</p>
+
+<p>Thank you for taking the time to review Dr. {{ review.doctor.name }}. Your feedback helps us improve our services and helps other patients make informed decisions.</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">👨‍⚕️ Doctor Reviewed</span>
+        <span class="info-value">Dr. {{ review.doctor.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">⭐ Your Rating</span>
+        <span class="info-value">
+            {% for i in "12345" %}
+                {% if forloop.counter <= review.rating %}
+                    ⭐
+                {% endif %}
+            {% endfor %}
+            ({{ review.rating }}/5)
+        </span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📅 Review Date</span>
+        <span class="info-value">{{ review.created_at|date:"F j, Y" }}</span>
+    </div>
+</div>
+
+{% if review.comment %}
+<div class="highlight-box" style="background: #e7f1ff; border-left-color: #0d6efd;">
+    <strong style="color: #0d6efd;">Your Review:</strong>
+    <p style="margin: 8px 0 0; color: #495057;">"{{ review.comment }}"</p>
+</div>
+{% endif %}
+
+<p>Your review has been published and is now visible to other patients on Dr. {{ review.doctor.name }}'s profile.</p>
+
+<p style="text-align: center;">
+    <a href="http://127.0.0.1:8000/doctor/{{ review.doctor.id }}/reviews/" class="btn">
+        View All Reviews →
+    </a>
+</p>
+
+<p>We appreciate your feedback and hope to serve you again soon!</p>
+{% endblock %}

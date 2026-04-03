@@ -1,0 +1,200 @@
+{% extends 'appointment/base.html' %}
+{% load static %}
+
+{% block title %}Home - VitalBook{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Your Health, Our Priority</h1>
+                <p class="hero-subtitle">Book appointments with expert doctors instantly. Quality healthcare at your fingertips.</p>
+                <div class="hero-buttons">
+                    <a href="{% url 'doctor_list' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-calendar-plus"></i> Book Appointment
+                    </a>
+                    <a href="{% url 'services' %}" class="btn btn-outline btn-lg">
+                        <i class="fas fa-info-circle"></i> Learn More
+                    </a>
+                </div>
+                
+                <!-- Stats -->
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-user-md"></i>
+                        <div>
+                            <h3>{{ total_doctors }}+</h3>
+                            <p>Expert Doctors</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <h3>{{ total_patients }}+</h3>
+                            <p>Happy Patients</p>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <div>
+                            <h3>{{ total_appointments }}+</h3>
+                            <p>Appointments</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=600" alt="Doctor">
+                <div class="hero-badge">
+                    <i class="fas fa-check-circle"></i>
+                    <span>24/7 Available</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Why Choose Us</h2>
+            <p>We provide the best healthcare services with modern facilities</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h3>Expert Doctors</h3>
+                <p>Highly qualified and experienced medical professionals</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>24/7 Service</h3>
+                <p>Round the clock emergency and consultation services</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-laptop-medical"></i>
+                </div>
+                <h3>Online Booking</h3>
+                <p>Easy and quick appointment booking system</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Safe & Secure</h3>
+                <p>Your health data is protected with us</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <h3>Affordable</h3>
+                <p>Quality healthcare at accessible prices for every Indian</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-ambulance"></i>
+                </div>
+                <h3>Emergency Care</h3>
+                <p>Immediate medical attention when you need it</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Specializations Section -->
+<section class="specializations-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Our Specializations</h2>
+            <p>Comprehensive medical services across various specialties</p>
+        </div>
+        
+        <div class="specializations-grid">
+            {% for spec in specializations %}
+            <div class="spec-card">
+                <div class="spec-icon">
+                    <i class="fas {{ spec.icon }}"></i>
+                </div>
+                <h3>{{ spec.name }}</h3>
+                <p>{{ spec.description|truncatewords:10 }}</p>
+                <a href="{% url 'doctor_list' %}?specialization={{ spec.id }}" class="spec-link">
+                    Find Doctors <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center" style="margin-top: 30px;">
+            <a href="{% url 'services' %}" class="btn btn-primary">View All Services</a>
+        </div>
+    </div>
+</section>
+
+<!-- Top Doctors Section -->
+<section class="doctors-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Our Top Doctors</h2>
+            <p>Meet our highly qualified medical professionals</p>
+        </div>
+        
+        <div class="doctors-grid">
+            {% for doctor in top_doctors %}
+            <div class="doctor-card-home">
+                <div class="doctor-image">
+                    <img src="https://ui-avatars.com/api/?name={{ doctor.name }}&size=200&background=4A90E2&color=fff" alt="{{ doctor.name }}">
+                    <div class="doctor-rating">
+                        <i class="fas fa-star"></i> {{ doctor.rating }}
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. {{ doctor.name }}</h3>
+                    <p class="specialization">{{ doctor.specialization.name }}</p>
+                    <p class="experience"><i class="fas fa-briefcase"></i> {{ doctor.experience_years }} years experience</p>
+                    <p class="qualification">{{ doctor.qualification }}</p>
+                    <div class="doctor-footer">
+                        <span class="fee"><i class="fas fa-rupee-sign"></i> {{ doctor.consultation_fee }}</span>
+                        <a href="{% url 'doctor_detail' doctor.id %}" class="btn btn-sm btn-primary">View Profile</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center" style="margin-top: 30px;">
+            <a href="{% url 'doctor_list' %}" class="btn btn-primary">View All Doctors</a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Get Started?</h2>
+            <p>Book your appointment today and take the first step towards better health</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'doctor_list' %}" class="btn btn-light btn-lg">Book Appointment Now</a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg">Register Now</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

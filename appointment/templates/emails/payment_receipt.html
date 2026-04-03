@@ -1,0 +1,58 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<h2>Payment Successful 💳</h2>
+
+<p>Dear {{ appointment.patient.name }},</p>
+
+<p>Your payment has been received successfully. Here is your receipt:</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">🧾 Receipt No.</span>
+        <span class="info-value">{{ payment.transaction_id }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📅 Payment Date</span>
+        <span class="info-value">{{ payment.payment_date|date:"F j, Y h:i A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">👨‍⚕️ Doctor</span>
+        <span class="info-value">Dr. {{ appointment.doctor.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">🏥 Specialization</span>
+        <span class="info-value">{{ appointment.doctor.specialization.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📅 Appointment Date</span>
+        <span class="info-value">{{ appointment.date|date:"F j, Y" }} at {{ appointment.time|time:"h:i A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">💳 Payment Method</span>
+        <span class="info-value">{{ payment.payment_method }}</span>
+    </div>
+    <div class="info-row" style="background: #d4edda; padding: 12px 8px; margin: 8px -8px; border-radius: 4px;">
+        <span class="info-label" style="color: #155724; font-weight: 600;">💰 Amount Paid</span>
+        <span class="info-value" style="color: #155724; font-size: 20px;">
+            ₹{{ payment.amount }}
+        </span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">✅ Status</span>
+        <span class="info-value">
+            <span class="status-badge status-paid">Paid</span>
+        </span>
+    </div>
+</div>
+
+<p style="text-align: center;">
+    <a href="http://127.0.0.1:8000/receipt/download/{{ appointment.id }}/" class="btn">
+        ⬇️ Download PDF Receipt
+    </a>
+</p>
+
+<p>Your appointment is confirmed. We look forward to seeing you!</p>
+
+<p>Thank you for choosing VitalBook!</p>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<h2>Appointment Confirmed! ✅</h2>
+
+<p>Dear {{ patient.name }},</p>
+
+<p>Your appointment has been successfully booked. Here are your details:</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">👨‍⚕️ Doctor</span>
+        <span class="info-value">Dr. {{ doctor.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">🏥 Specialization</span>
+        <span class="info-value">{{ doctor.specialization.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📅 Date</span>
+        <span class="info-value">{{ appointment.date|date:"l, F j, Y" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">⏰ Time</span>
+        <span class="info-value">{{ appointment.time|time:"h:i A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">💰 Consultation Fee</span>
+        <span class="info-value">₹{{ doctor.consultation_fee }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📋 Booking ID</span>
+        <span class="info-value">VB-{{ appointment.id }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value">
+            <span class="status-badge status-confirmed">✅ Confirmed</span>
+        </span>
+    </div>
+</div>
+
+<div class="highlight-box">
+    <strong>💡 Important:</strong> Please arrive 10 minutes early for your appointment. Bring any previous medical records or prescriptions if available.
+</div>
+
+<p style="text-align: center;">
+    <a href="http://127.0.0.1:8000/my-appointments/" class="btn">
+        View My Appointments →
+    </a>
+</p>
+
+<p>If you need to reschedule or cancel, please do so at least 24 hours in advance to avoid cancellation fees.</p>
+
+<p>Thank you for choosing VitalBook!</p>
+{% endblock %}

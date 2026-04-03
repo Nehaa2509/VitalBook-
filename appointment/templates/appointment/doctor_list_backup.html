@@ -1,0 +1,122 @@
+﻿{% extends 'appointment/base.html' %}
+
+{% block title %}Find Doctors - VITALBOOK{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Find Your Doctor</h1>
+        <p>Browse through our expert medical professionals</p>
+    </div>
+</section>
+
+<section class="doctor-filter-section">
+    <div class="container">
+        <div class="filter-bar">
+            <form method="GET" class="filter-form">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Search doctors by name, specialization..." value="{{ search_query|default:'' }}">
+                </div>
+                
+                <select name="specialization" class="filter-select">
+                    <option value="">All Specializations</option>
+                    {% for spec in specializations %}
+                        <option value="{{ spec.id }}" {% if selected_spec == spec.id|stringformat:"s" %}selected{% endif %}>
+                            {{ spec.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <select name="sort" class="filter-select">
+                    <option value="-rating">Highest Rated</option>
+                    <option value="name">Name (A-Z)</option>
+                    <option value="consultation_fee">Lowest Fee</option>
+                    <option value="-experience_years">Most Experienced</option>
+                </select>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+            </form>
+        </div>
+        
+        <div class="doctors-list">
+            {% if doctors %}
+                {% for doctor in doctors %}
+                <div class="doctor-list-card">
+                    <div class="doctor-list-image">
+                        <img src="https://ui-avatars.com/api/?name={{ doctor.name }}&size=150&background=4A90E2&color=fff" alt="{{ doctor.name }}">
+                        {% if doctor.is_available %}
+                            <span class="availability-badge available">Available</span>
+                        {% else %}
+                            <span class="availability-badge unavailable">Unavailable</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="doctor-list-info">
+                        <div class="doctor-header">
+                            <div>
+                                <h3>Dr. {{ doctor.name }}</h3>
+                                <p class="specialization">
+                                    <i class="fas fa-stethoscope"></i> {{ doctor.specialization.name }}
+                                </p>
+                            </div>
+                            <div class="doctor-rating-badge">
+                                <div class="rating-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= doctor.rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-number">{{ doctor.rating }}</span>
+                            </div>
+                        </div>
+                        
+                        <p class="qualification">{{ doctor.qualification }}</p>
+                        
+                        <div class="doctor-details">
+                            <span><i class="fas fa-briefcase"></i> {{ doctor.experience_years }} years exp.</span>
+                            <span><i class="fas fa-clock"></i> {{ doctor.available_time }}</span>
+                            <span><i class="fas fa-calendar"></i> {{ doctor.available_days }}</span>
+                        </div>
+                        
+                        <p class="doctor-bio">{{ doctor.bio|truncatewords:20 }}</p>
+                        
+                        <div class="doctor-list-footer">
+                            <div class="consultation-fee">
+                                <span class="fee-label">Consultation Fee</span>
+                                <span class="fee-amount">₹{{ doctor.consultation_fee }}</span>
+                            </div>
+                            <div class="doctor-actions">
+                                <a href="{% url 'doctor_detail' doctor.id %}" class="btn btn-outline btn-sm">
+                                    <i class="fas fa-eye"></i> View Profile
+                                </a>
+                                {% if user.is_authenticated %}
+                                    <a href="{% url 'book_appointment' doctor.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-calendar-plus"></i> Book Now
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'login' %}?next={% url 'book_appointment' doctor.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-calendar-plus"></i> Book Now
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <h3>No doctors found</h3>
+                    <p>Try adjusting your search or filters</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

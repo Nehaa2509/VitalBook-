@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hospital Appointment System{% endblock %}</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/additional.css' %}">
+    <link rel="stylesheet" href="{% static 'css/indian_hospital_theme.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-wrapper">
+                <a href="{% url 'home' %}" class="logo">
+                    <i class="fas fa-plus-square"></i>
+                    <span>VitalBook</span>
+                </a>
+                
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+                    <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
+                    <li><a href="{% url 'services' %}" class="{% if request.resolver_match.url_name == 'services' %}active{% endif %}">Services</a></li>
+                    <li><a href="{% url 'doctor_list' %}" class="{% if request.resolver_match.url_name == 'doctor_list' %}active{% endif %}">Doctors</a></li>
+                    <li><a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a></li>
+                    
+                    {% if user.is_authenticated %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle">
+                                <i class="fas fa-user-circle"></i> {{ user.username }}
+                            </a>
+                            <div class="dropdown-menu">
+                                {% if request.user.is_staff or request.user.is_superuser %}
+                                <!-- ADMIN LINKS -->
+                                <div class="dropdown-section-title">Admin</div>
+                                <a href="/admin/" class="dropdown-item">
+                                    <i class="fas fa-cog"></i> Admin Panel
+                                </a>
+                                <a href="{% url 'doctor_dashboard' %}" class="dropdown-item">
+                                    <i class="fas fa-chart-line"></i> Doctor Dashboard
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                {% endif %}
+                                
+                                {% if request.user.is_staff == False %}
+                                <!-- DOCTOR LINKS -->
+                                {% with doctor=request.user.doctor_set.first %}
+                                {% if doctor %}
+                                <div class="dropdown-section-title">Doctor</div>
+                                <a href="{% url 'doctor_dashboard' %}" class="dropdown-item">
+                                    <i class="fas fa-stethoscope"></i> My Dashboard
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                {% endif %}
+                                {% endwith %}
+                                {% endif %}
+                                
+                                <!-- COMMON LINKS -->
+                                <a href="{% url 'profile' %}" class="dropdown-item">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                                <a href="{% url 'my_appointments' %}" class="dropdown-item">
+                                    <i class="fas fa-calendar-check"></i> My Appointments
+                                </a>
+                                <a href="{% url 'patient_dashboard' %}" class="dropdown-item">
+                                    <i class="fas fa-th-large"></i> Dashboard
+                                </a>
+                                
+                                <div class="dropdown-divider"></div>
+                                <a href="{% url 'logout' %}" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}" class="btn-nav">Login</a></li>
+                        <li><a href="{% url 'register' %}" class="btn-nav btn-primary">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible">
+            <button class="alert-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-plus-square"></i> VitalBook</h3>
+                    <p>Your health is our priority. Book appointments with the top specialists seamlessly across India.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'about' %}">About Us</a></li>
+                        <li><a href="{% url 'services' %}">Services</a></li>
+                        <li><a href="{% url 'doctor_list' %}">Find Doctors</a></li>
+                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="#">Emergency Care</a></li>
+                        <li><a href="#">Online Consultation</a></li>
+                        <li><a href="#">Lab Tests</a></li>
+                        <li><a href="#">Health Checkup</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> 12 Health Avenue, New Delhi, 110001, India</li>
+                        <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                        <li><i class="fas fa-envelope"></i> care@vitalbook.in</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Emergency Available</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 VitalBook. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/script.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

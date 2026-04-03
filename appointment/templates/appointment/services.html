@@ -1,0 +1,81 @@
+﻿{% extends 'appointment/base.html' %}
+
+{% block title %}Our Services - VITALBOOK{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Our Medical Services</h1>
+        <p>Comprehensive healthcare solutions for you and your family</p>
+    </div>
+</section>
+
+<section class="services-content">
+    <div class="container">
+        <div class="services-grid-large">
+            {% for spec in specializations %}
+            <div class="service-card-large">
+                <div class="service-icon-large">
+                    <i class="fas {{ spec.icon }}"></i>
+                </div>
+                <h3>{{ spec.name }}</h3>
+                <p>{{ spec.description|default:"Comprehensive medical care and treatment in "|add:spec.name }}</p>
+                <a href="{% url 'doctor_list' %}?specialization={{ spec.id }}" class="service-link">
+                    Find Specialists <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="additional-services">
+    <div class="container">
+        <h2 class="section-title">Additional Services</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-ambulance"></i>
+                </div>
+                <h3>Emergency Care</h3>
+                <p>24/7 emergency medical services</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-vial"></i>
+                </div>
+                <h3>Laboratory</h3>
+                <p>Advanced diagnostic testing</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-x-ray"></i>
+                </div>
+                <h3>Radiology</h3>
+                <p>State-of-the-art imaging services</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <h3>Pharmacy</h3>
+                <p>In-house pharmacy services</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <h3>Inpatient Care</h3>
+                <p>Comfortable patient rooms</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-laptop-medical"></i>
+                </div>
+                <h3>Telemedicine</h3>
+                <p>Online consultations available</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<h2>Appointment Cancelled ❌</h2>
+
+<p>Dear {{ appointment.patient.name }},</p>
+
+<p>Your appointment has been cancelled. Here are the details:</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">👨‍⚕️ Doctor</span>
+        <span class="info-value">Dr. {{ appointment.doctor.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📅 Date</span>
+        <span class="info-value">{{ appointment.date|date:"l, F j, Y" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">⏰ Time</span>
+        <span class="info-value">{{ appointment.time|time:"h:i A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📋 Booking ID</span>
+        <span class="info-value">VB-{{ appointment.id }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value">
+            <span class="status-badge status-cancelled">❌ Cancelled</span>
+        </span>
+    </div>
+    {% if appointment.cancellation_fee_applied > 0 %}
+    <div class="info-row" style="background: #fff3cd; padding: 12px 8px; margin: 8px -8px; border-radius: 4px;">
+        <span class="info-label" style="color: #856404; font-weight: 600;">⚠️ Cancellation Fee</span>
+        <span class="info-value" style="color: #856404; font-size: 18px;">
+            ₹{{ appointment.cancellation_fee_applied }}
+        </span>
+    </div>
+    {% endif %}
+</div>
+
+{% if appointment.cancellation_fee_applied > 0 %}
+<div class="highlight-box">
+    <strong>⚠️ Cancellation Policy:</strong> A cancellation fee of ₹{{ appointment.cancellation_fee_applied }} has been applied as the cancellation was made after the 24-hour free cancellation window.
+</div>
+{% else %}
+<div class="highlight-box" style="background: #d4edda; border-left-color: #28a745;">
+    <strong style="color: #155724;">✅ No Cancellation Fee:</strong> Your appointment was cancelled within the 24-hour free cancellation window.
+</div>
+{% endif %}
+
+<p>If you'd like to book another appointment, we're here to help!</p>
+
+<p style="text-align: center;">
+    <a href="http://127.0.0.1:8000/doctors/" class="btn">
+        Book New Appointment →
+    </a>
+</p>
+
+<p>Thank you for using VitalBook!</p>
+{% endblock %}

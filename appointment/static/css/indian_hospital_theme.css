@@ -1,0 +1,493 @@
+:root {
+  /* Trust Blue & Saffron Palette */
+  --primary-blue: #0B3B60;
+  --primary-blue-light: #1A5276;
+  --saffron-orange: #E87A00;
+  --saffron-light: #FF9F1C;
+  --light-gray: #F8F9FA;
+  --dark-text: #2C3E50;
+  --white: #FFFFFF;
+  --success-green: #27AE60;
+  --danger-red: #E74C3C;
+  
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --shadow-sm: 0 4px 6px rgba(0,0,0,0.05);
+  --shadow-md: 0 10px 20px rgba(0,0,0,0.08);
+  --shadow-lg: 0 15px 30px rgba(11, 59, 96, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--dark-text);
+  background-color: var(--light-gray);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--primary-blue);
+  font-weight: 600;
+}
+
+/* Navbar Premium Styling */
+.navbar {
+  background: var(--primary-blue);
+  box-shadow: var(--shadow-md);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 3px solid var(--saffron-orange);
+}
+
+.navbar .nav-wrapper .logo {
+  color: var(--white);
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.navbar .nav-wrapper .logo i {
+  color: var(--saffron-orange);
+  font-size: 1.8rem;
+}
+
+.nav-links li a {
+  color: #E2E8F0;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: var(--transition);
+  text-decoration: none;
+  font-family: var(--font-heading);
+}
+
+.nav-links li a:hover, .nav-links li a.active {
+  color: var(--saffron-orange);
+}
+
+.btn-primary, .btn-nav.btn-primary {
+  background: linear-gradient(135deg, var(--saffron-orange), var(--saffron-light)) !important;
+  color: var(--white) !important;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 0.6rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.btn-primary:hover, .btn-nav.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, var(--saffron-light), var(--saffron-orange)) !important;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition);
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(11, 59, 96, 0.2);
+}
+
+/* Footer Styling */
+.footer {
+  background-color: var(--primary-blue);
+  color: var(--white);
+  padding: 4rem 0 2rem;
+  border-top: 4px solid var(--saffron-orange);
+}
+
+.footer h3, .footer h4 {
+  color: var(--white);
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.footer h4::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 40px;
+  background-color: var(--saffron-orange);
+}
+
+.footer p, .footer ul li, .footer .contact-info li, .footer a {
+  color: #CBD5E1;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.footer a:hover {
+  color: var(--saffron-orange);
+  padding-left: 5px;
+}
+
+.footer .social-links a {
+  background: rgba(255,255,255,0.1);
+  color: var(--white);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.footer .social-links a:hover {
+  background: var(--saffron-orange);
+  transform: translateY(-3px);
+}
+
+/* Doctor Profiles Grid */
+.doctor-profile-card {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  text-align: center;
+  border-top: 4px solid var(--primary-blue-light);
+}
+
+.doctor-profile-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-top-color: var(--saffron-orange);
+}
+
+.doctor-profile-card .doc-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin: 1.5rem auto 1rem;
+  object-fit: cover;
+  border: 3px solid var(--light-gray);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.fee-badge {
+  background: rgba(46, 204, 113, 0.1);
+  color: #27AE60;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+/* Booking Calendar & Layout */
+.appointment-form-container {
+  max-width: 800px;
+  margin: 3rem auto;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--primary-blue);
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  width: 100%;
+  transition: var(--transition);
+  font-family: var(--font-body);
+}
+
+.form-control:focus {
+  border-color: var(--saffron-orange);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(232, 122, 0, 0.1);
+}
+
+/* Alerts / Banners */
+.alert-warning {
+  background-color: #FFF3CD;
+  color: #856404;
+  border-left: 4px solid var(--saffron-orange);
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+/* =========================================
+   MISSING LAYOUT & CARD STYLES (UI FIX)
+========================================= */
+
+/* Feature Cards */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.feature-card {
+  background: var(--white);
+  padding: 40px 30px;
+  border-radius: var(--border-radius);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  border: 1px solid var(--glass-border);
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-md);
+  border-bottom: 4px solid var(--saffron-orange);
+}
+
+.feature-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-light));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 32px;
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.feature-card h3 {  font-size: 22px; margin-bottom: 15px; }
+
+/* Specializations */
+.specializations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.spec-card {
+  background: var(--white);
+  padding: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.spec-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.spec-icon {
+  width: 70px;
+  height: 70px;
+  background: var(--primary-blue-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 28px;
+  color: var(--white);
+}
+
+.spec-link {
+  color: var(--saffron-orange);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+}
+
+.spec-link:hover { gap: 10px; }
+
+/* Doctors Home Grid */
+.doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.doctor-card-home {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  border: 1px solid #e2e8f0;
+}
+
+.doctor-card-home:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-md);
+  border-top: 4px solid var(--saffron-orange);
+}
+
+.doctor-image {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+  background: var(--light-gray);
+}
+
+.doctor-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.doctor-rating {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: var(--saffron-orange);
+  color: var(--white);
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.doctor-info {
+  padding: 25px;
+}
+
+.doctor-info .specialization {
+  color: var(--primary-blue);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.doctor-info .experience, .doctor-info .qualification {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.doctor-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.doctor-footer .fee {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-blue);
+}
+
+/* Services Page Large Cards */
+.services-grid-large {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.service-card-large {
+  background: var(--white);
+  padding: 40px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  border-bottom: 4px solid var(--primary-blue-light);
+}
+
+.service-card-large:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-bottom-color: var(--saffron-orange);
+}
+
+.service-icon-large {
+  width: 90px;
+  height: 90px;
+  background: rgba(11, 59, 96, 0.1);
+  color: var(--primary-blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin-bottom: 25px;
+  transition: var(--transition);
+}
+
+.service-card-large:hover .service-icon-large {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+
+.service-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--saffron-orange);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.service-link:hover { gap: 10px; padding-left: 5px;}
+
+/* Form Nav Fix */
+.btn-nav, .btn-nav:not(.btn-primary) {
+  color: var(--white) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+.btn-nav:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.section-header { text-align: center; margin-bottom: 40px; }
+.section-header h2 { font-size: 32px; color: var(--primary-blue); }
+.section-header p { color: #64748b; font-size: 18px; }
+
+/* Fixing Auth alignment */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}

@@ -1,0 +1,56 @@
+{% extends 'emails/base_email.html' %}
+
+{% block content %}
+<h2>Reminder: Appointment Tomorrow ⏰</h2>
+
+<p>Dear {{ appointment.patient.name }},</p>
+
+<p>This is a friendly reminder that you have an appointment <strong>tomorrow</strong>:</p>
+
+<div class="info-card">
+    <div class="info-row">
+        <span class="info-label">👨‍⚕️ Doctor</span>
+        <span class="info-value">Dr. {{ appointment.doctor.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">🏥 Specialization</span>
+        <span class="info-value">{{ appointment.doctor.specialization.name }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📅 Date</span>
+        <span class="info-value">{{ appointment.date|date:"l, F j, Y" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">⏰ Time</span>
+        <span class="info-value">{{ appointment.time|time:"h:i A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📞 Doctor's Contact</span>
+        <span class="info-value">{{ appointment.doctor.phone }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">📋 Booking ID</span>
+        <span class="info-value">VB-{{ appointment.id }}</span>
+    </div>
+</div>
+
+<div class="highlight-box">
+    <strong>💡 Preparation Tips:</strong>
+    <ul style="margin: 8px 0; padding-left: 20px;">
+        <li>Arrive 10 minutes early</li>
+        <li>Bring any previous prescriptions or medical records</li>
+        <li>Prepare a list of symptoms or questions</li>
+        <li>Bring your ID and insurance card (if applicable)</li>
+    </ul>
+</div>
+
+<p style="text-align: center;">
+    <a href="http://127.0.0.1:8000/appointment/{{ appointment.id }}/" class="btn">
+        View Appointment Details →
+    </a>
+</p>
+
+<p>Need to reschedule? Please contact us at least 24 hours in advance.</p>
+
+<p>We look forward to seeing you tomorrow!</p>
+{% endblock %}
