@@ -1,0 +1,201 @@
+{% extends 'appointment/base.html' %}
+{% load static %}
+
+{% block title %}Verify OTP - VitalBook{% endblock %}
+
+{% block extra_css %}
+<style>
+    .otp-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .otp-card {
+        background: white;
+        border-radius: 20px;
+        padding: 50px 40px;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        text-align: center;
+    }
+    
+    .otp-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    .otp-card h2 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 28px;
+    }
+    
+    .otp-card > p {
+        color: #6c757d;
+        margin-bottom: 30px;
+        font-size: 16px;
+    }
+    
+    .otp-card strong {
+        color: #0d6efd;
+    }
+    
+    .otp-inputs {
+        margin: 30px 0;
+    }
+    
+    .otp-input {
+        width: 100%;
+        padding: 15px;
+        font-size: 24px;
+        text-align: center;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        letter-spacing: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .otp-input:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+    }
+    
+    .btn-full {
+        width: 100%;
+        padding: 15px;
+        font-size: 18px;
+        font-weight: 600;
+        border-radius: 12px;
+        margin-top: 20px;
+    }
+    
+    .resend-text {
+        margin-top: 25px;
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    .resend-text a {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .resend-text a:hover {
+        text-decoration: underline;
+    }
+    
+    .otp-timer {
+        margin-top: 20px;
+        padding: 12px;
+        background: #fff3cd;
+        border-radius: 8px;
+        color: #856404;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    #countdown {
+        font-size: 18px;
+        color: #dc3545;
+    }
+    
+    .expired-text {
+        color: #dc3545;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="otp-container">
+    <div class="otp-card">
+        <div class="otp-icon">📧</div>
+        <h2>Verify Your Account</h2>
+        <p>We sent a 6-digit OTP to <strong>{{ email }}</strong></p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="otp-inputs">
+                <input type="text" 
+                       name="otp" 
+                       maxlength="6" 
+                       placeholder="Enter 6-digit OTP"
+                       class="otp-input" 
+                       autofocus 
+                       required
+                       pattern="[0-9]{6}"
+                       inputmode="numeric">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">
+                ✅ Verify OTP
+            </button>
+        </form>
+        
+        <p class="resend-text">
+            Didn't receive OTP? 
+            <a href="{% url 'resend_otp' %}">Resend OTP</a>
+        </p>
+        
+        <div class="otp-timer" id="timer">
+            OTP expires in <span id="countdown">10:00</span>
+        </div>
+    </div>
+</div>
+
+<script>
+// Countdown timer
+let timeLeft = 600; // 10 minutes in seconds
+const timerElement = document.getElementById('timer');
+const countdownElement = document.getElementById('countdown');
+
+const timer = setInterval(() => {
+    timeLeft--;
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    countdownElement.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    
+    if (timeLeft <= 0) {
+        clearInterval(timer);
+        timerElement.innerHTML = '<span class="expired-text">⚠️ OTP expired. Please resend.</span>';
+    }
+}, 1000);
+
+// Auto-submit on 6 digits
+const otpInput = document.querySelector('.otp-input');
+otpInput.addEventListener('input', function() {
+    // Remove non-numeric characters
+    this.value = this.value.replace(/[^0-9]/g, '');
+    
+    // Auto-submit when 6 digits entered
+    if (this.value.length === 6) {
+        this.closest('form').submit();
+    }
+});
+
+// Prevent paste of non-numeric
+otpInput.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+    const numericOnly = pastedText.replace(/[^0-9]/g, '').substring(0, 6);
+    this.value = numericOnly;
+    
+    if (numericOnly.length === 6) {
+        this.closest('form').submit();
+    }
+});
+</script>
+{% endblock %}

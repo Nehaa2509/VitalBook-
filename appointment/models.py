@@ -1,8 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import timedelta
+
 
 
 class Specialization(models.Model):
@@ -213,6 +214,37 @@ class ContactMessage(models.Model):
     
     def __str__(self):
         return f"Message from {self.name} - {self.subject}"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+
+import random
+
+class OTPVerification(models.Model):
+    OTP_TYPE_CHOICES = [
+        ('email', 'Email'),
+        ('mobile', 'Mobile'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_verifications')
+    otp = models.CharField(max_length=6)
+    otp_type = models.CharField(max_length=10, choices=OTP_TYPE_CHOICES, default='email')
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+    def generate_otp(self):
+        self.otp = str(random.randint(100000, 999999))
+        self.expires_at = timezone.now() + timedelta(minutes=10)
+        self.save()
+        return self.otp
+    
+    def __str__(self):
+        return f"OTP for {self.user.username} - {self.otp_type} - {'Verified' if self.is_verified else 'Pending'}"
     
     class Meta:
         ordering = ['-created_at']

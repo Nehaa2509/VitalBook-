@@ -8,9 +8,10 @@ from django.core.mail import send_mail
 from django.conf import settings as django_settings
 from django.http import JsonResponse
 from datetime import datetime, timedelta
-from .models import Doctor, Patient, Appointment, Specialization, Review, ContactMessage, Billing, Prescription, Payment
+from .models import Doctor, Patient, Appointment, Specialization, Review, ContactMessage, Billing, Prescription, Payment, OTPVerification
 from django.contrib.auth.models import User
 from . import email_utils
+from . import otp_utils
 import qrcode
 import io
 import os
@@ -251,7 +252,11 @@ def register(request):
             messages.error(request, 'Email already registered!')
             return redirect('register')
         
+        # Create user but keep inactive until OTP verified
         user = User.objects.create_user(username=username, email=email, password=password)
+        user.is_active = False  # Inactive until OTP verified
+        user.save()
+        
         patient = Patient.objects.create(
             user=user,
             name=name,
@@ -263,11 +268,17 @@ def register(request):
             address=address
         )
         
-        # Send welcome email
-        email_utils.send_welcome_email(user, patient)
+        # Generate and send OTP
+        otp_obj = OTPVerification.objects.create(user=user, otp_type='email')
+        otp = otp_obj.generate_otp()
+        otp_utils.send_email_otp(user, otp)
         
-        messages.success(request, 'Registration successful! Please login.')
-        return redirect('login')
+        # Store user ID in session for OTP verification
+        request.session['user_id'] = user.id
+        request.session['user_email'] = user.email
+        
+        messages.success(request, 'Registration successful! Please verify your email with the OTP sent.')
+        return redirect('verify_otp')
     
     return render(request, 'appointment/register.html')
 
@@ -1056,3 +1067,88 @@ def update_doctor_profile(request):
         return redirect('doctor_dashboard')
     
     return redirect('doctor_dashboard')
+
+
+
+def verify_otp(request):
+    """Verify OTP for user registration."""
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.error(request, 'Session expired. Please register again.')
+        return redirect('register')
+    
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'User not found. Please register again.')
+        return redirect('register')
+    
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp', '').strip()
+        
+        try:
+            otp_obj = OTPVerification.objects.filter(
+                user=user,
+                is_verified=False
+            ).latest('created_at')
+            
+            if otp_obj.is_expired():
+                messages.error(request, 'OTP expired. Please request a new one.')
+            elif otp_obj.otp == entered_otp:
+                # OTP is correct
+                otp_obj.is_verified = True
+                otp_obj.save()
+                
+                # Activate user account
+                user.is_active = True
+                user.save()
+                
+                # Send welcome email
+                try:
+                    patient = user.patient
+                    email_utils.send_welcome_email(user, patient)
+                except:
+                    pass
+                
+                # Clear session
+                del request.session['user_id']
+                if 'user_email' in request.session:
+                    del request.session['user_email']
+                
+                messages.success(request, 'Account verified successfully! You can now login.')
+                return redirect('login')
+            else:
+                messages.error(request, 'Invalid OTP. Please try again.')
+        except OTPVerification.DoesNotExist:
+            messages.error(request, 'No OTP found. Please request a new one.')
+    
+    context = {
+        'user': user,
+        'email': user.email
+    }
+    return render(request, 'appointment/verify_otp.html', context)
+
+
+def resend_otp(request):
+    """Resend OTP to user."""
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.error(request, 'Session expired. Please register again.')
+        return redirect('register')
+    
+    try:
+        user = User.objects.get(id=user_id)
+        
+        # Create new OTP
+        otp_obj = OTPVerification.objects.create(user=user, otp_type='email')
+        otp = otp_obj.generate_otp()
+        otp_utils.send_email_otp(user, otp)
+        
+        messages.success(request, 'New OTP sent to your email.')
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('register')
+    except Exception as e:
+        messages.error(request, 'Error sending OTP. Please try again.')
+    
+    return redirect('verify_otp')

@@ -319,3 +319,28 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 console.log('MediCare Hospital System - JavaScript Loaded Successfully');
+
+
+// User Dropdown Panel Toggle
+function toggleUserPanel() {
+    const panel = document.getElementById('user-panel');
+    const chevron = document.getElementById('chevron-icon');
+    panel.classList.toggle('active');
+    chevron.style.transform = panel.classList.contains('active') 
+        ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+// Close panel when clicking outside
+document.addEventListener('click', function(e) {
+    const dropdown = document.querySelector('.nav-user-dropdown');
+    if (dropdown && !dropdown.contains(e.target)) {
+        const panel = document.getElementById('user-panel');
+        const chevron = document.getElementById('chevron-icon');
+        if (panel) {
+            panel.classList.remove('active');
+        }
+        if (chevron) {
+            chevron.style.transform = 'rotate(0deg)';
+        }
+    }
+});
