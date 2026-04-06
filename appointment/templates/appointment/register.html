@@ -1,6 +1,122 @@
-﻿{% extends 'appointment/base.html' %}
+{% extends 'appointment/base.html' %}
 
 {% block title %}Register - VITALBOOK{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── DOB calendar field ──────────────────────────────── */
+.dob-wrapper {
+    position: relative;
+    width: 100%;
+}
+.dob-display-input {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border: 2px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    background: #fff;
+    color: #0B2B46;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    caret-color: transparent;
+    user-select: none;
+}
+.dob-display-input:hover  { border-color: #FF8C00; }
+.dob-display-input:focus  { outline: none; border-color: #FF8C00; box-shadow: 0 0 0 3px rgba(255,140,0,0.15); }
+.dob-cal-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #FF8C00;
+    pointer-events: none;
+    font-size: 1.1rem;
+}
+
+/* ── Popup calendar ──────────────────────────────────── */
+.cal-popup {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 9999;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(11,43,70,0.20);
+    width: 300px;
+    overflow: hidden;
+    font-family: inherit;
+}
+.cal-popup.open { display: block; }
+
+.cal-header {
+    background: #0B2B46;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+}
+.cal-header select {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 2px 4px;
+}
+.cal-header select option { background: #0B2B46; color: #fff; }
+.cal-nav {
+    background: none;
+    border: none;
+    color: #FF8C00;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.cal-nav:hover { background: rgba(255,140,0,0.15); }
+
+.cal-grid {
+    padding: 10px 12px 14px;
+}
+.cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7,1fr);
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0B2B46;
+    margin-bottom: 6px;
+}
+.cal-days {
+    display: grid;
+    grid-template-columns: repeat(7,1fr);
+    gap: 2px;
+    text-align: center;
+}
+.cal-day {
+    padding: 6px 0;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    color: #333;
+    transition: background 0.15s;
+}
+.cal-day:hover { background: #fff3e0; color: #FF8C00; }
+.cal-day.selected { background: #FF8C00; color: #fff; font-weight: 700; }
+.cal-day.today { border: 2px solid #0B2B46; font-weight: 600; }
+.cal-day.other-month { color: #bbb; }
+.cal-day.disabled { color: #ddd; cursor: not-allowed; pointer-events: none; }
+.cal-day.empty { cursor: default; }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="auth-section">
@@ -17,34 +133,54 @@
             <div class="auth-form-container">
                 <h2>Create Account</h2>
                 <p class="auth-subtitle">Fill in your details to register</p>
-                
+
+                {% if messages %}
+                <div style="margin-bottom:16px;">
+                    {% for message in messages %}
+                    <div style="background:{% if message.tags == 'error' %}#fff0f0{% else %}#f0fff4{% endif %};
+                                border-left:4px solid {% if message.tags == 'error' %}#e53e3e{% else %}#38a169{% endif %};
+                                padding:10px 14px; border-radius:6px; margin-bottom:6px;
+                                color:{% if message.tags == 'error' %}#c53030{% else %}#276749{% endif %};
+                                font-size:0.9rem; font-weight:500;">
+                        {% if message.tags == 'error' %}⚠ {% else %}✅ {% endif %}{{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <form method="POST" class="auth-form" id="registerForm">
                     {% csrf_token %}
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label><i class="fas fa-user"></i> Full Name *</label>
-                            <input type="text" name="name" required placeholder="Enter your full name">
+                            <input type="text" name="name" required
+                                   placeholder="Enter your full name"
+                                   value="{{ form_data.name|default:'' }}">
                         </div>
-                        
                         <div class="form-group">
                             <label><i class="fas fa-user-circle"></i> Username *</label>
-                            <input type="text" name="username" required placeholder="Choose a username">
+                            <input type="text" name="username" required
+                                   placeholder="Choose a username"
+                                   value="{{ form_data.username|default:'' }}">
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label><i class="fas fa-envelope"></i> Email *</label>
-                            <input type="email" name="email" required placeholder="your@email.com">
+                            <input type="email" name="email" required
+                                   placeholder="your@email.com"
+                                   value="{{ form_data.email|default:'' }}">
                         </div>
-                        
                         <div class="form-group">
                             <label><i class="fas fa-phone"></i> Phone *</label>
-                            <input type="tel" name="phone" required placeholder="+91 98765 43210">
+                            <input type="tel" name="phone" required
+                                   placeholder="+91 98765 43210"
+                                   value="{{ form_data.phone|default:'' }}">
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label><i class="fas fa-lock"></i> Password *</label>
@@ -59,40 +195,69 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label><i class="fas fa-calendar"></i> Date of Birth</label>
-                            <input type="date" name="date_of_birth" max="2026-04-02">
+                            <label><i class="fas fa-calendar-alt"></i> Date of Birth</label>
+                            <!-- Hidden input holds YYYY-MM-DD for Django -->
+                            <input type="hidden" name="date_of_birth" id="dob_hidden">
+                            <div class="dob-wrapper" id="dob_wrapper">
+                                <input type="text"
+                                       id="dob_display"
+                                       class="dob-display-input"
+                                       placeholder="Click to pick date"
+                                       readonly>
+                                <span class="dob-cal-icon"><i class="fas fa-calendar-alt"></i></span>
+                                <!-- Inline calendar popup -->
+                                <div class="cal-popup" id="dob_cal">
+                                    <div class="cal-header">
+                                        <button type="button" class="cal-nav" id="cal_prev">&#8249;</button>
+                                        <div style="display:flex;gap:6px;align-items:center;">
+                                            <select id="cal_month"></select>
+                                            <select id="cal_year" style="width:64px;"></select>
+                                        </div>
+                                        <button type="button" class="cal-nav" id="cal_next">&#8250;</button>
+                                    </div>
+                                    <div class="cal-grid">
+                                        <div class="cal-weekdays">
+                                            <span>Su</span><span>Mo</span><span>Tu</span>
+                                            <span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                                        </div>
+                                        <div class="cal-days" id="cal_days"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <small style="color:#FF8C00;font-weight:500;display:block;margin-top:4px;" id="age_display"></small>
                         </div>
                         
                         <div class="form-group">
-                            <label><i class="fas fa-venus-mars"></i> Gender</label>
-                            <select name="gender">
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
+                            <label><i class="fas fa-venus-mars"></i> Gender *</label>
+                            <select name="gender" id="gender_sel" required>
+                                <option value="">-- Select Gender --</option>
+                                <option value="Male"   {% if form_data.gender == 'Male'   %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if form_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                                <option value="Other"  {% if form_data.gender == 'Other'  %}selected{% endif %}>Other</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label><i class="fas fa-tint"></i> Blood Group</label>
-                            <select name="blood_group">
-                                <option value="">Select Blood Group</option>
-                                <option value="A+">A+</option>
-                                <option value="A-">A-</option>
-                                <option value="B+">B+</option>
-                                <option value="B-">B-</option>
-                                <option value="AB+">AB+</option>
-                                <option value="AB-">AB-</option>
-                                <option value="O+">O+</option>
-                                <option value="O-">O-</option>
+                            <label><i class="fas fa-tint"></i> Blood Group *</label>
+                            <select name="blood_group" id="blood_sel" required>
+                                <option value="">-- Select Blood Group --</option>
+                                <option value="A+"  {% if form_data.blood_group == 'A+'  %}selected{% endif %}>A+</option>
+                                <option value="A-"  {% if form_data.blood_group == 'A-'  %}selected{% endif %}>A-</option>
+                                <option value="B+"  {% if form_data.blood_group == 'B+'  %}selected{% endif %}>B+</option>
+                                <option value="B-"  {% if form_data.blood_group == 'B-'  %}selected{% endif %}>B-</option>
+                                <option value="AB+" {% if form_data.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if form_data.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                <option value="O+"  {% if form_data.blood_group == 'O+'  %}selected{% endif %}>O+</option>
+                                <option value="O-"  {% if form_data.blood_group == 'O-'  %}selected{% endif %}>O-</option>
                             </select>
                         </div>
-                        
                         <div class="form-group">
-                            <label><i class="fas fa-map-marker-alt"></i> Address</label>
-                            <input type="text" name="address" placeholder="Your address">
+                            <label><i class="fas fa-map-marker-alt"></i> Address *</label>
+                            <input type="text" name="address" required
+                                   placeholder="Your full address"
+                                   value="{{ form_data.address|default:'' }}">
                         </div>
                     </div>
                     
@@ -112,21 +277,168 @@
 
 {% block extra_js %}
 <script>
-document.getElementById('registerForm').addEventListener('submit', function(e) {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm_password').value;
-    
-    if (password !== confirmPassword) {
-        e.preventDefault();
-        alert('Passwords do not match!');
-        return false;
+(function () {
+    var MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+    var today  = new Date();
+    var curY   = today.getFullYear();
+    var curM   = today.getMonth();   // 0-based
+    var selDate = null;              // selected Date object
+
+    /* ── DOM refs ── */
+    var display  = document.getElementById('dob_display');
+    var hidden   = document.getElementById('dob_hidden');
+    var popup    = document.getElementById('dob_cal');
+    var wrapper  = document.getElementById('dob_wrapper');
+    var daysEl   = document.getElementById('cal_days');
+    var monthSel = document.getElementById('cal_month');
+    var yearSel  = document.getElementById('cal_year');
+    var ageEl    = document.getElementById('age_display');
+
+    /* ── Populate month/year dropdowns ── */
+    MONTHS.forEach(function(m, i) {
+        var o = document.createElement('option');
+        o.value = i; o.textContent = m;
+        monthSel.appendChild(o);
+    });
+    for (var y = today.getFullYear(); y >= 1900; y--) {
+        var o = document.createElement('option');
+        o.value = y; o.textContent = y;
+        yearSel.appendChild(o);
     }
-    
-    if (password.length < 6) {
-        e.preventDefault();
-        alert('Password must be at least 6 characters long!');
-        return false;
+
+    function syncSelects() {
+        monthSel.value = curM;
+        yearSel.value  = curY;
     }
-});
+
+    /* ── Build calendar grid ── */
+    function renderGrid() {
+        syncSelects();
+        daysEl.innerHTML = '';
+        var first   = new Date(curY, curM, 1).getDay(); // 0=Sun
+        var daysIn  = new Date(curY, curM + 1, 0).getDate();
+
+        // blank cells before day 1
+        for (var b = 0; b < first; b++) {
+            var sp = document.createElement('span');
+            sp.className = 'cal-day empty';
+            daysEl.appendChild(sp);
+        }
+
+        for (var d = 1; d <= daysIn; d++) {
+            var btn = document.createElement('span');
+            btn.className = 'cal-day';
+            btn.textContent = d;
+            var thisDate = new Date(curY, curM, d);
+
+            // Disable future dates
+            if (thisDate > today) {
+                btn.classList.add('disabled');
+            } else {
+                // Mark today
+                if (curY === today.getFullYear() && curM === today.getMonth() && d === today.getDate()) {
+                    btn.classList.add('today');
+                }
+                // Mark selected
+                if (selDate && curY === selDate.getFullYear() && curM === selDate.getMonth() && d === selDate.getDate()) {
+                    btn.classList.add('selected');
+                }
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var day  = parseInt(this.textContent);
+                    selDate  = new Date(curY, curM, day);
+                    setDate(selDate);
+                    closePopup();
+                });
+            }
+            daysEl.appendChild(btn);
+        }
+    }
+
+    /* ── Format helpers ── */
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function toISO(d) {
+        return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    }
+
+    function toDisplay(d) {
+        return pad(d.getDate()) + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function calcAge(d) {
+        var age = today.getFullYear() - d.getFullYear();
+        var m   = today.getMonth() - d.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+        return age;
+    }
+
+    function setDate(d) {
+        hidden.value  = toISO(d);
+        display.value = toDisplay(d);
+        var age = calcAge(d);
+        ageEl.textContent = (age >= 0 && age <= 120) ? 'Age: ' + age + ' years' : '';
+        renderGrid(); // refresh to show selected highlight
+    }
+
+    /* ── Open / close ── */
+    function openPopup() {
+        popup.classList.add('open');
+        renderGrid();
+    }
+    function closePopup() {
+        popup.classList.remove('open');
+    }
+
+    display.addEventListener('click', function(e) {
+        e.stopPropagation();
+        popup.classList.contains('open') ? closePopup() : openPopup();
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        if (!wrapper.contains(e.target)) closePopup();
+    });
+
+    /* ── Navigation ── */
+    document.getElementById('cal_prev').addEventListener('click', function(e) {
+        e.stopPropagation();
+        curM--;
+        if (curM < 0) { curM = 11; curY--; }
+        renderGrid();
+    });
+    document.getElementById('cal_next').addEventListener('click', function(e) {
+        e.stopPropagation();
+        curM++;
+        if (curM > 11) { curM = 0; curY++; }
+        // Don't go past current month
+        if (curY > today.getFullYear() || (curY === today.getFullYear() && curM > today.getMonth())) {
+            curM = today.getMonth(); curY = today.getFullYear();
+        }
+        renderGrid();
+    });
+    monthSel.addEventListener('change', function(e) {
+        e.stopPropagation();
+        curM = parseInt(this.value);
+        renderGrid();
+    });
+    yearSel.addEventListener('change', function(e) {
+        e.stopPropagation();
+        curY = parseInt(this.value);
+        renderGrid();
+    });
+
+    // Initialise at current month
+    syncSelects();
+
+    /* ── Password validation ── */
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        var pw  = document.getElementById('password').value;
+        var cpw = document.getElementById('confirm_password').value;
+        if (pw !== cpw) { e.preventDefault(); alert('Passwords do not match!'); return false; }
+        if (pw.length < 6) { e.preventDefault(); alert('Password must be at least 6 characters long!'); return false; }
+    });
+})();
 </script>
 {% endblock %}

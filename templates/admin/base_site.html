@@ -1,0 +1,97 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/admin_theme.css' %}">
+    <style>
+        /* Pending Appointments Notification Bar — hidden by default, shown by JS */
+        #pending-notification-bar {
+            display: none;          /* JS sets to flex when count > 0 */
+            background: linear-gradient(135deg, #FF8C00, #e07000);
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            border-bottom: 2px solid #c05c00;
+            animation: pulse-bar 2s ease-in-out infinite alternate;
+        }
+        @keyframes pulse-bar {
+            from { box-shadow: 0 2px 8px rgba(255,140,0,0.3); }
+            to   { box-shadow: 0 2px 16px rgba(255,140,0,0.6); }
+        }
+        #pending-notification-bar a {
+            color: #fff !important;
+            text-decoration: underline;
+            font-weight: 700;
+        }
+        .pending-bell { font-size: 18px; animation: bell-shake 1s ease infinite; display: inline-block; }
+        @keyframes bell-shake {
+            0%,100% { transform: rotate(0); }
+            20%      { transform: rotate(-15deg); }
+            40%      { transform: rotate(15deg); }
+            60%      { transform: rotate(-8deg); }
+            80%      { transform: rotate(8deg); }
+        }
+    </style>
+{% endblock %}
+
+{% block branding %}
+    <h1 id="site-name"><a href="{% url 'admin:index' %}">
+        <span style="color: #FF8C00;">&#43;</span> VitalBook Admin
+    </a></h1>
+{% endblock %}
+
+{% block nav-global %}
+    <!-- 🔔 Live Pending Appointments Notification Bar -->
+    <div id="pending-notification-bar" role="alert">
+        <span>
+            <span class="pending-bell">🔔</span>
+            &nbsp;<strong id="pending-bar-count">0</strong> appointment(s) are waiting for your confirmation!
+            &nbsp;|&nbsp;
+            <a href="/admin/appointment/appointment/?status__exact=Pending">View &amp; Confirm All →</a>
+        </span>
+        <button onclick="document.getElementById('pending-notification-bar').classList.add('hidden')"
+                style="background:none;border:1px solid rgba(255,255,255,0.6);color:#fff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;">
+            Dismiss
+        </button>
+    </div>
+
+    <script>
+        (function() {
+            var bar     = document.getElementById('pending-notification-bar');
+            var countEl = document.getElementById('pending-bar-count');
+
+            function loadPending() {
+                fetch('/admin/appointment/appointment/pending-count/', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r) {
+                    // If not JSON (e.g. redirected to login page), do nothing
+                    var ct = r.headers.get('content-type') || '';
+                    if (!ct.includes('application/json')) return null;
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (!data) return;
+                    if (data.count > 0) {
+                        countEl.textContent = data.count;
+                        bar.style.display = 'flex';
+                    } else {
+                        bar.style.display = 'none';
+                    }
+                })
+                .catch(function() { bar.style.display = 'none'; });
+            }
+
+            // Run immediately when DOM ready
+            document.addEventListener('DOMContentLoaded', loadPending);
+            // Auto-refresh every 60 seconds
+            setInterval(loadPending, 60000);
+        })();
+    </script>
+{% endblock %}

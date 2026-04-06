@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 1.5cm 2cm;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #2C3E50;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        .header-table {
+            width: 100%;
+            border-bottom: 3px solid #0B2B46;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+        .hospital-name {
+            color: #0B2B46;
+            font-size: 26px;
+            font-weight: bold;
+            margin: 0 0 2px 0;
+        }
+        .hospital-tagline {
+            color: #FF8C00;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .hospital-contact {
+            color: #666;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        .doctor-info-cell {
+            text-align: right;
+            vertical-align: top;
+        }
+        .doctor-name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #0B2B46;
+        }
+        .doctor-spec {
+            color: #FF8C00;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .doctor-meta {
+            color: #555;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        /* ── Prescription ID Banner ── */
+        .rx-banner {
+            background-color: #0B2B46;
+            color: #ffffff;
+            padding: 8px 15px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .rx-banner span {
+            color: #FF8C00;
+        }
+
+        /* ── Patient Info ── */
+        .patient-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        .patient-table td {
+            padding: 8px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+        .patient-table .label {
+            color: #666;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            width: 30%;
+            background-color: #f8f8f8;
+        }
+
+        /* ── Rx Symbol ── */
+        .rx-symbol {
+            font-size: 48px;
+            font-weight: bold;
+            color: #0B2B46;
+            margin: 0 0 8px 0;
+            line-height: 1;
+        }
+        .rx-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #0B2B46;
+            border-bottom: 2px solid #FF8C00;
+            padding-bottom: 5px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+
+        /* ── Medicines Table ── */
+        .medicines-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 22px;
+        }
+        .medicines-table th {
+            background-color: #0B2B46;
+            color: #ffffff;
+            padding: 9px 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .medicines-table td {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            font-size: 13px;
+            vertical-align: top;
+            background-color: #fefefe;
+        }
+        .medicine-line {
+            padding: 5px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        .medicine-line:last-child {
+            border-bottom: none;
+        }
+        .med-name {
+            font-weight: bold;
+            color: #0B2B46;
+        }
+        .med-detail {
+            color: #555;
+            font-size: 12px;
+        }
+
+        /* ── Instructions ── */
+        .instructions-box {
+            border-left: 4px solid #FF8C00;
+            background-color: #fffaf4;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+        .instructions-title {
+            font-weight: bold;
+            color: #0B2B46;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        /* ── Signature ── */
+        .signature-section {
+            text-align: right;
+            margin-top: 40px;
+            padding-top: 15px;
+        }
+        .signature-line {
+            border-top: 1.5px solid #0B2B46;
+            width: 200px;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+        .signature-name {
+            font-weight: bold;
+            color: #0B2B46;
+            font-size: 14px;
+        }
+        .signature-spec {
+            color: #FF8C00;
+            font-size: 12px;
+        }
+
+        /* ── Footer (fixed at bottom of every page) ── */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+        }
+
+        /* ── Validity Note ── */
+        .validity-note {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fixed Footer -->
+    <div class="footer">
+        VitalBook Hospital Management System &nbsp;|&nbsp; Computer-generated prescription &nbsp;|&nbsp; Valid for 30 days from date of issue
+    </div>
+
+    <!-- ══ HEADER ══ -->
+    <table class="header-table">
+        <tr>
+            <td style="vertical-align: top;">
+                <div class="hospital-name">+ VitalBook</div>
+                <div class="hospital-tagline">Your Health, Our Priority</div>
+                <div class="hospital-contact">123 Healthcare Avenue, Mumbai, Maharashtra | Tel: +91-98765-43210</div>
+            </td>
+            <td class="doctor-info-cell">
+                <div class="doctor-name">Dr. {{ appointment.doctor.name }}</div>
+                <div class="doctor-spec">{{ appointment.doctor.specialization.name }}</div>
+                {% if appointment.doctor.qualification %}
+                <div class="doctor-meta">{{ appointment.doctor.qualification }}</div>
+                {% endif %}
+                <div class="doctor-meta">Date: {{ prescription.issued_on|date:"d F Y" }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ══ PRESCRIPTION BANNER ══ -->
+    <div class="rx-banner">
+        Prescription ID: <span>#VB-{{ appointment.id }}</span>
+        &nbsp;&nbsp;&nbsp;
+        Appointment Date: <span>{{ appointment.date|date:"d M Y" }}</span>
+        &nbsp;&nbsp;&nbsp;
+        Time: <span>{{ appointment.time|time:"h:i A" }}</span>
+    </div>
+
+    <!-- ══ PATIENT DETAILS ══ -->
+    <table class="patient-table">
+        <tr>
+            <td class="label">Patient Name</td>
+            <td><strong>{{ appointment.patient.name }}</strong></td>
+            <td class="label">Gender</td>
+            <td>{{ appointment.patient.gender|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Date of Birth</td>
+            <td>{{ appointment.patient.date_of_birth|date:"d M Y"|default:"—" }}</td>
+            <td class="label">Blood Group</td>
+            <td>{{ appointment.patient.blood_group|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Contact</td>
+            <td>{{ appointment.patient.phone|default:"—" }}</td>
+            <td class="label">Email</td>
+            <td>{{ appointment.patient.email|default:"—" }}</td>
+        </tr>
+        {% if appointment.reason %}
+        <tr>
+            <td class="label">Chief Complaint</td>
+            <td colspan="3">{{ appointment.reason }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <!-- ══ Rx SYMBOL + MEDICINES ══ -->
+    <div class="rx-symbol">&#8478;</div>
+
+    <table class="medicines-table">
+        <tr>
+            <th>Prescribed Medicines &amp; Dosage</th>
+        </tr>
+        <tr>
+            <td>
+                {% for line in prescription.medicines.splitlines %}
+                {% if line.strip %}
+                <div class="medicine-line">
+                    {% with parts=line|cut:"  "|make_list %}
+                    <span class="med-name">{{ line }}</span>
+                    {% endwith %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+
+    <!-- ══ INSTRUCTIONS ══ -->
+    <div class="instructions-box">
+        <div class="instructions-title">Doctor's Instructions &amp; Advice:</div>
+        {{ prescription.instructions|linebreaksbr }}
+    </div>
+
+    <!-- ══ SIGNATURE ══ -->
+    <div class="signature-section">
+        <div class="signature-line"></div><br>
+        <div class="signature-name">Dr. {{ appointment.doctor.name }}</div>
+        <div class="signature-spec">{{ appointment.doctor.specialization.name }}</div>
+        {% if appointment.doctor.qualification %}
+        <div style="font-size:11px; color:#666;">{{ appointment.doctor.qualification }}</div>
+        {% endif %}
+    </div>
+
+    <div class="validity-note">
+        This prescription is valid for 30 days from {{ prescription.issued_on|date:"d M Y" }}.
+        Please carry this document when purchasing medicines.
+    </div>
+
+</body>
+</html>

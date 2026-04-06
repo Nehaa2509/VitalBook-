@@ -32,7 +32,7 @@ class DoctorAdmin(admin.ModelAdmin):
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ['name', 'email', 'phone', 'gender', 'blood_group', 'created_at']
+    list_display = ['name', 'email', 'phone', 'date_of_birth', 'age_display', 'gender', 'blood_group', 'created_at']
     list_filter = ['gender', 'blood_group', 'created_at']
     search_fields = ['name', 'email', 'phone']
     fieldsets = (
@@ -46,6 +46,11 @@ class PatientAdmin(admin.ModelAdmin):
             'fields': ('medical_history',)
         }),
     )
+
+    def age_display(self, obj):
+        age = obj.age
+        return f'{age} yrs' if age is not None else '—'
+    age_display.short_description = 'Age'
 
 
 @admin.register(Appointment)
@@ -90,10 +95,10 @@ class AppointmentAdmin(admin.ModelAdmin):
         has_payment = obj.payments.filter(payment_status='Completed').exists()
         if has_payment:
             return format_html(
-                '<span style="color:#28a745;font-weight:600;">✅ Paid</span>'
+                '<span style="color:#28a745;font-weight:600;">{}</span>', '✅ Paid'
             )
         return format_html(
-            '<span style="color:#dc3545;font-weight:600;">❌ Unpaid</span>'
+            '<span style="color:#dc3545;font-weight:600;">{}</span>', '❌ Unpaid'
         )
     payment_status_display.short_description = 'Payment'
     
@@ -104,7 +109,8 @@ class AppointmentAdmin(admin.ModelAdmin):
                 '<a href="/admin/appointment/appointment/{}/change/" '
                 'style="background:#28a745;color:white;padding:4px 10px;'
                 'border-radius:6px;text-decoration:none;margin-right:4px;font-size:11px;">'
-                '✅ Edit</a>'
+                '✅ Edit</a>',
+                obj.id
             )
         return format_html(
             '<span style="color:#6c757d;font-size:11px;">{}</span>', obj.status
@@ -146,6 +152,59 @@ class AppointmentAdmin(admin.ModelAdmin):
         }),
     )
     readonly_fields = ['created_at', 'updated_at', 'cancelled_at']
+
+    # ── Custom URLs for the pending appointments dashboard widget ──
+    def get_urls(self):
+        from django.urls import path
+        urls = super().get_urls()
+        custom_urls = [
+            path('pending-count/', self.admin_site.admin_view(self.pending_count_view), name='appointment_pending_count'),
+            path('quick-confirm/<int:appointment_id>/', self.admin_site.admin_view(self.quick_confirm_view), name='appointment_quick_confirm'),
+        ]
+        return custom_urls + urls
+
+    def pending_count_view(self, request):
+        """Returns JSON with count + list of pending appointments."""
+        from django.http import JsonResponse
+        pending = Appointment.objects.filter(status='Pending').select_related(
+            'patient', 'doctor'
+        ).order_by('date', 'time')
+        data = {
+            'count': pending.count(),
+            'appointments': [
+                {
+                    'id': a.id,
+                    'patient': a.patient.name,
+                    'doctor': f'Dr. {a.doctor.name}',
+                    'specialization': a.doctor.specialization.name if a.doctor.specialization else '',
+                    'date': a.date.strftime('%d %b %Y'),
+                    'time': a.time.strftime('%I:%M %p'),
+                    'confirm_url': f'/admin/appointment/appointment/quick-confirm/{a.id}/',
+                    'detail_url': f'/admin/appointment/appointment/{a.id}/change/',
+                }
+                for a in pending[:15]
+            ]
+        }
+        return JsonResponse(data)
+
+    def quick_confirm_view(self, request, appointment_id):
+        """Confirms a single appointment via one click and returns updated count."""
+        from django.http import JsonResponse
+        try:
+            appt = Appointment.objects.get(id=appointment_id, status='Pending')
+            appt.status = 'Confirmed'
+            appt.save()
+            # Send confirmation email
+            try:
+                from . import email_utils
+                email_utils.send_appointment_confirmation(appt)
+            except Exception:
+                pass
+            remaining = Appointment.objects.filter(status='Pending').count()
+            return JsonResponse({'success': True, 'remaining': remaining})
+        except Appointment.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Appointment not found'}, status=404)
+
 
 
 @admin.register(Billing)
@@ -210,14 +269,21 @@ class PaymentAdmin(admin.ModelAdmin):
     )
 
 
-
 @admin.register(OTPVerification)
 class OTPVerificationAdmin(admin.ModelAdmin):
     list_display = ['user', 'otp', 'otp_type', 'is_verified', 'is_expired_display', 'created_at', 'expires_at']
     list_filter = ['otp_type', 'is_verified', 'created_at']
     search_fields = ['user__username', 'user__email', 'otp']
     readonly_fields = ['created_at', 'expires_at']
-    
+
+    def save_model(self, request, obj, form, change):
+        """Auto-set expires_at (10 min from now) if not already set."""
+        from django.utils import timezone
+        from datetime import timedelta
+        if not obj.expires_at:
+            obj.expires_at = timezone.now() + timedelta(minutes=10)
+        super().save_model(request, obj, form, change)
+
     def is_expired_display(self, obj):
         from django.utils.html import format_html
         if obj.is_expired():

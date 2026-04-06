@@ -1,6 +1,25 @@
-﻿{% extends 'appointment/base.html' %}
+{% extends 'appointment/base.html' %}
 
 {% block title %}My Profile - VITALBOOK{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+.flatpickr-input { width:100%; padding:0.75rem 1rem; border:2px solid #CBD5E1; border-radius:8px; font-size:1rem; font-family:inherit; cursor:pointer; background:#fff; color:#0B2B46; box-sizing:border-box; transition:border-color 0.2s; }
+.flatpickr-input:hover { border-color:#FF8C00; }
+.flatpickr-input:focus { outline:none; border-color:#FF8C00; box-shadow:0 0 0 3px rgba(255,140,0,0.15); }
+.flatpickr-calendar { border-radius:12px; box-shadow:0 8px 32px rgba(11,43,70,0.18); border:none; font-family:inherit; }
+.flatpickr-months { background:#0B2B46; border-radius:12px 12px 0 0; padding:6px 0; }
+.flatpickr-month { color:#fff; }
+.flatpickr-current-month .flatpickr-monthDropdown-months { color:#fff; background:#0B2B46; }
+.flatpickr-current-month input.cur-year { color:#fff; }
+.flatpickr-prev-month svg, .flatpickr-next-month svg { fill:#FF8C00; }
+.flatpickr-weekday { color:#0B2B46; font-weight:600; }
+.flatpickr-day:hover { background:#fff3e0; border-color:#FF8C00; }
+.flatpickr-day.selected, .flatpickr-day.selected:hover { background:#FF8C00 !important; border-color:#FF8C00 !important; color:#fff !important; }
+.flatpickr-day.today { border-color:#0B2B46; }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="profile-section">
@@ -46,8 +65,20 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label><i class="fas fa-calendar"></i> Date of Birth</label>
-                            <input type="date" name="date_of_birth" value="{{ patient.date_of_birth|date:'Y-m-d' }}">
+                            <label><i class="fas fa-calendar-alt"></i> Date of Birth</label>
+                            <!-- Flatpickr visible input -->
+                            <input type="text"
+                                   id="dob_display"
+                                   placeholder="Click to select date"
+                                   value="{{ patient.date_of_birth|date:'d M Y' }}">
+                            <!-- Hidden input Django reads on POST -->
+                            <input type="hidden"
+                                   name="date_of_birth"
+                                   id="dob-input"
+                                   value="{{ patient.date_of_birth|date:'Y-m-d' }}">
+                            <small style="color:#FF8C00; font-weight:500; display:block; margin-top:4px;" id="age-display">
+                                {% if patient.age %}Age: {{ patient.age }} years{% endif %}
+                            </small>
                         </div>
                         
                         <div class="form-group">
@@ -96,4 +127,58 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+function calcAge(dateStr) {
+    var p = dateStr.split('-');
+    if (p.length !== 3) return -1;
+    var dob   = new Date(+p[0], +p[1] - 1, +p[2]);
+    var today = new Date();
+    var age   = today.getFullYear() - dob.getFullYear();
+    var m     = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    return age;
+}
+
+function showAge(isoStr) {
+    var el = document.getElementById('age-display');
+    if (!el) return;
+    if (!isoStr) { el.textContent = ''; return; }
+    var age = calcAge(isoStr);
+    el.textContent = (age >= 0 && age <= 120) ? 'Age: ' + age + ' years' : '';
+}
+
+// Read existing DOB from hidden input to pre-populate Flatpickr
+var existingIso = document.getElementById('dob-input').value;
+
+flatpickr('#dob_display', {
+    dateFormat:      'd M Y',
+    maxDate:         'today',
+    minDate:         '1900-01-01',
+    disableMobile:   false,
+    allowInput:      true,
+    yearSelectorType: 'select',
+    defaultDate:     existingIso || null,
+    onChange: function(selectedDates) {
+        if (selectedDates.length) {
+            var d    = selectedDates[0];
+            var yyyy = d.getFullYear();
+            var mm   = String(d.getMonth() + 1).padStart(2, '0');
+            var dd   = String(d.getDate()).padStart(2, '0');
+            var iso  = yyyy + '-' + mm + '-' + dd;
+            document.getElementById('dob-input').value = iso;
+            showAge(iso);
+        } else {
+            document.getElementById('dob-input').value = '';
+            showAge('');
+        }
+    }
+});
+
+// Show age immediately on page load
+showAge(existingIso);
+</script>
 {% endblock %}

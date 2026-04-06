@@ -61,4 +61,7 @@ urlpatterns = [
     path('payment/process/', views.process_payment, name='process_payment'),
     path('payment-success/<int:appointment_id>/', views.payment_success, name='payment_success'),
     # path('receipt/download/<int:appointment_id>/', views.download_receipt, name='download_receipt'),
+
+    # Prescription PDF Download
+    path('prescription/<int:appointment_id>/download/', views.download_prescription_pdf, name='download_prescription'),
 ]

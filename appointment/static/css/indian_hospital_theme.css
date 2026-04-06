@@ -491,3 +491,37 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     margin-bottom: 20px;
 }
+
+/* =========================================
+   DROPDOWN SOLID BACKGROUND FIX
+   Prevents glass/transparency bleeding in
+========================================= */
+.dropdown-menu {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    opacity: 1 !important;              /* When visible, always fully opaque */
+    color: #333333 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    z-index: 9999 !important;
+    position: absolute !important;
+}
+
+.dropdown-item {
+    color: #212529 !important;
+    background-color: transparent !important;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f4ff !important;
+    color: #0d6efd !important;
+}
+
+/* Dropdown toggle — white text on dark navbar, orange on hover */
+.nav-links .dropdown a.dropdown-toggle {
+    color: #ffffff !important;           /* Keep white — dark bg would hide #0B3B60 */
+}
+
+.nav-links .dropdown a.dropdown-toggle:hover {
+    color: #FF8C00 !important;           /* Orange on hover for visibility */
+}

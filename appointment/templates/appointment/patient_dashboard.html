@@ -601,9 +601,19 @@
                     
                     <div class="appointment-actions">
                         {% if appointment.has_completed_payment %}
-                            <a href="{% url 'download_receipt' appointment.id %}" class="btn-sm btn-success">📄 Receipt</a>
+                            <a href="{% url 'appointment_detail' appointment.id %}" class="btn-sm btn-success">📄 Receipt</a>
                         {% endif %}
-                        
+
+                        {% if appointment.prescription_record %}
+                            <a href="{% url 'download_prescription' appointment.id %}"
+                               class="btn-sm"
+                               style="background:#0B2B46;color:white;"
+                               title="Download your prescription as PDF"
+                               target="_blank">
+                               💊 Prescription
+                            </a>
+                        {% endif %}
+
                         {% if appointment.review %}
                             <span class="btn-sm btn-outline" style="cursor: default;">✅ Reviewed</span>
                         {% else %}
@@ -647,7 +657,7 @@
                             <td>₹{{ payment.amount }}</td>
                             <td><span class="payment-method">{{ payment.payment_method }}</span></td>
                             <td><span class="payment-status-paid">✅ Paid</span></td>
-                            <td><a href="{% url 'download_receipt' payment.appointment.id %}" class="btn-sm btn-outline">📄 Receipt</a></td>
+                            <td><a href="{% url 'appointment_detail' payment.appointment.id %}" class="btn-sm btn-outline">📄 Receipt</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>

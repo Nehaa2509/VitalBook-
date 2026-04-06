@@ -1,0 +1,128 @@
+/* ============================================
+   VitalBook Custom Admin Theme
+   Colors: Dark Blue #0B2B46 + Orange #FF8C00
+============================================ */
+
+/* 1. Top Header Background */
+#header {
+    background-color: #0B2B46 !important;
+    color: #ffffff !important;
+    border-bottom: 3px solid #FF8C00 !important;
+}
+
+/* 2. Header Site Name / Title */
+#site-name a {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-decoration: none;
+}
+
+/* 3. Header links */
+#header a:link,
+#header a:visited {
+    color: #ffffff !important;
+}
+#header a:hover {
+    color: #FF8C00 !important;
+}
+
+/* 4. User Tools (top right: welcome, logout) */
+#user-tools a {
+    color: #FF8C00 !important;
+    border-bottom: none !important;
+}
+#user-tools a:hover {
+    color: #ffffff !important;
+}
+
+/* 5. Breadcrumbs bar */
+div.breadcrumbs {
+    background-color: #FF8C00 !important;
+    color: #ffffff !important;
+    padding: 10px 20px !important;
+}
+div.breadcrumbs a {
+    color: #ffffff !important;
+    text-decoration: underline;
+}
+div.breadcrumbs a:hover {
+    color: #0B2B46 !important;
+}
+
+/* 6. Module Section Headers (APPOINTMENT, AUTH, etc.) */
+.module caption,
+.module h2,
+#changelist .module h2 {
+    background-color: #0B2B46 !important;
+    color: #ffffff !important;
+    border-radius: 4px 4px 0 0;
+}
+
+/* 7. Sidebar App Headers */
+#nav-sidebar .module h2 {
+    background-color: #0B2B46 !important;
+    color: #ffffff !important;
+}
+
+/* 8. General links */
+a:link, a:visited {
+    color: #0B2B46;
+}
+a:hover {
+    color: #FF8C00;
+}
+
+/* 9. Buttons — Save, Add, Log in */
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input,
+a.button,
+.addlink,
+.changelink {
+    background-color: #FF8C00 !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background 0.2s ease !important;
+}
+.button:hover,
+input[type=submit]:hover,
+a.button:hover {
+    background-color: #e07000 !important;
+}
+
+/* 10. Delete button stays red */
+.deletelink,
+.submit-row a.deletelink {
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+}
+.deletelink:hover {
+    background-color: #b02a37 !important;
+}
+
+/* 11. Login page */
+#login-form input[type=submit] {
+    background-color: #FF8C00 !important;
+    color: white !important;
+    width: 100%;
+    padding: 12px !important;
+    font-size: 1rem !important;
+    border-radius: 6px !important;
+}
+
+/* 12. Selected/active rows in changelist */
+#result_list tr.selected {
+    background-color: rgba(255, 140, 0, 0.1) !important;
+}
+
+/* 13. Paginator active page */
+.paginator a:focus,
+.paginator a:hover {
+    color: #FF8C00 !important;
+}

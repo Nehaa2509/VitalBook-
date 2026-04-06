@@ -1,4 +1,4 @@
-﻿from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -6,7 +6,7 @@ from django.db.models import Q, Avg, Count, Sum
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings as django_settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from datetime import datetime, timedelta
 from .models import Doctor, Patient, Appointment, Specialization, Review, ContactMessage, Billing, Prescription, Payment, OTPVerification
 from django.contrib.auth.models import User
@@ -229,58 +229,124 @@ def doctor_detail(request, doctor_id):
 
 def register(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
-        name = request.POST['name']
-        phone = request.POST['phone']
-        date_of_birth = request.POST.get('date_of_birth')
-        gender = request.POST.get('gender')
-        blood_group = request.POST.get('blood_group')
-        address = request.POST.get('address')
-        
-        if password != confirm_password:
+        username   = request.POST.get('username', '').strip()
+        email      = request.POST.get('email', '').strip()
+        password   = request.POST.get('password', '')
+        confirm_pw = request.POST.get('confirm_password', '')
+        name       = request.POST.get('name', '').strip()
+        phone      = request.POST.get('phone', '').strip()
+        dob        = request.POST.get('date_of_birth', '').strip()
+        gender     = request.POST.get('gender', '').strip()
+        blood_group = request.POST.get('blood_group', '').strip()
+        address    = request.POST.get('address', '').strip()
+
+        # Keep form data so user doesn't retype on error
+        form_data = {
+            'username': username, 'email': email, 'name': name,
+            'phone': phone, 'dob': dob, 'gender': gender,
+            'blood_group': blood_group, 'address': address,
+        }
+
+        # ── Required field checks ──────────────────────────────────────────
+        errors = []
+        if not name:
+            errors.append('Full Name is required.')
+        if not username:
+            errors.append('Username is required.')
+        if not email:
+            errors.append('Email is required.')
+        if not phone:
+            errors.append('Phone number is required.')
+        if not password:
+            errors.append('Password is required.')
+        if not gender:
+            errors.append('Please select your Gender.')
+        if not blood_group:
+            errors.append('Please select your Blood Group.')
+        if not address:
+            errors.append('Address is required.')
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'appointment/register.html', {'form_data': form_data})
+
+        # ── Password checks ───────────────────────────────────────────────
+        if password != confirm_pw:
             messages.error(request, 'Passwords do not match!')
-            return redirect('register')
-        
+            return render(request, 'appointment/register.html', {'form_data': form_data})
+
+        if len(password) < 6:
+            messages.error(request, 'Password must be at least 6 characters.')
+            return render(request, 'appointment/register.html', {'form_data': form_data})
+
+        # ── Uniqueness checks ─────────────────────────────────────────────
         if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username already exists!')
-            return redirect('register')
-        
+            messages.error(request, f'Username "{username}" is already taken. Please choose another.')
+            return render(request, 'appointment/register.html', {'form_data': form_data})
+
         if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email already registered!')
-            return redirect('register')
-        
-        # Create user but keep inactive until OTP verified
+            messages.error(request, f'An account with email "{email}" already exists. Please login instead.')
+            return render(request, 'appointment/register.html', {'form_data': form_data})
+
+        # ── DOB validation (optional field but must be valid if given) ────
+        import datetime as dt
+        dob_obj = None
+        if dob:
+            try:
+                dob_obj = dt.date.fromisoformat(dob)
+                if dob_obj > dt.date.today():
+                    messages.error(request, 'Date of Birth cannot be a future date.')
+                    return render(request, 'appointment/register.html', {'form_data': form_data})
+                if dob_obj.year < 1900:
+                    messages.error(request, 'Please enter a valid Date of Birth.')
+                    return render(request, 'appointment/register.html', {'form_data': form_data})
+            except ValueError:
+                messages.error(request, 'Invalid Date of Birth format.')
+                return render(request, 'appointment/register.html', {'form_data': form_data})
+
+        # ── Create user (inactive until OTP) ─────────────────────────────
         user = User.objects.create_user(username=username, email=email, password=password)
-        user.is_active = False  # Inactive until OTP verified
+        user.is_active = False
         user.save()
-        
-        patient = Patient.objects.create(
+
+        Patient.objects.create(
             user=user,
             name=name,
             email=email,
             phone=phone,
-            date_of_birth=date_of_birth if date_of_birth else None,
+            date_of_birth=dob_obj,
             gender=gender,
             blood_group=blood_group,
-            address=address
+            address=address,
         )
-        
-        # Generate and send OTP
-        otp_obj = OTPVerification.objects.create(user=user, otp_type='email')
+
+        # ── OTP: prefer SMS if phone given, fall back to email ────────────
+        otp_method = 'mobile' if phone else 'email'
+        otp_obj = OTPVerification.objects.create(user=user, otp_type=otp_method)
         otp = otp_obj.generate_otp()
-        otp_utils.send_email_otp(user, otp)
-        
-        # Store user ID in session for OTP verification
-        request.session['user_id'] = user.id
+
+        if otp_method == 'mobile':
+            sms_sent = otp_utils.send_mobile_otp(phone, otp)
+            if not sms_sent:
+                otp_utils.send_email_otp(user, otp)
+            channel_msg = 'phone number'
+        else:
+            otp_utils.send_email_otp(user, otp)
+            channel_msg = 'email'
+
+        request.session['user_id']    = user.id
         request.session['user_email'] = user.email
-        
-        messages.success(request, 'Registration successful! Please verify your email with the OTP sent.')
+
+        messages.success(
+            request,
+            f'Registration successful! A 6-digit OTP has been sent to your {channel_msg}. '
+            f'Please verify to activate your account.'
+        )
         return redirect('verify_otp')
-    
+
     return render(request, 'appointment/register.html')
+
 
 
 def user_login(request):
@@ -319,17 +385,35 @@ def profile(request):
     if request.method == 'POST':
         patient.name = request.POST.get('name')
         patient.phone = request.POST.get('phone')
-        patient.date_of_birth = request.POST.get('date_of_birth') or None
         patient.gender = request.POST.get('gender')
         patient.blood_group = request.POST.get('blood_group')
         patient.address = request.POST.get('address')
         patient.emergency_contact = request.POST.get('emergency_contact')
         patient.medical_history = request.POST.get('medical_history')
+
+        # Server-side DOB validation — safety net behind JS checks
+        dob_str = request.POST.get('date_of_birth')
+        if dob_str:
+            try:
+                import datetime as dt
+                dob = dt.date.fromisoformat(dob_str)
+                if dob > dt.date.today():
+                    messages.error(request, 'Date of Birth cannot be a future date!')
+                    return render(request, 'appointment/profile.html', {'patient': patient})
+                if dob.year < 1900:
+                    messages.error(request, 'Please enter a valid Date of Birth.')
+                    return render(request, 'appointment/profile.html', {'patient': patient})
+                patient.date_of_birth = dob
+            except ValueError:
+                messages.error(request, 'Invalid date format for Date of Birth.')
+                return render(request, 'appointment/profile.html', {'patient': patient})
+        else:
+            patient.date_of_birth = None
+
         patient.save()
-        
         messages.success(request, 'Profile updated successfully!')
         return redirect('profile')
-    
+
     return render(request, 'appointment/profile.html', {'patient': patient})
 
 
@@ -1152,3 +1236,36 @@ def resend_otp(request):
         messages.error(request, 'Error sending OTP. Please try again.')
     
     return redirect('verify_otp')
+
+
+@login_required
+def download_prescription_pdf(request, appointment_id):
+    """Generate and download a professional PDF prescription."""
+    appointment = get_object_or_404(
+        Appointment,
+        id=appointment_id,
+        patient__user=request.user  # patients can only download their own
+    )
+    prescription = Prescription.objects.filter(appointment=appointment).first()
+
+    if not prescription:
+        messages.error(request, 'No prescription found for this appointment.')
+        return redirect('appointment_detail', appointment_id=appointment_id)
+
+    from django.template.loader import get_template
+    from xhtml2pdf import pisa
+
+    template = get_template('appointment/prescription_pdf.html')
+    context = {'appointment': appointment, 'prescription': prescription}
+    html = template.render(context)
+
+    response = HttpResponse(content_type='application/pdf')
+    safe_name = f"Prescription_{appointment.patient.name.replace(' ', '_')}_{appointment.date}"
+    response['Content-Disposition'] = f'attachment; filename="{safe_name}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        messages.error(request, 'Error generating PDF. Please try again.')
+        return redirect('appointment_detail', appointment_id=appointment_id)
+
+    return response

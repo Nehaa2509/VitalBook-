@@ -5,6 +5,12 @@ from django.utils import timezone
 from datetime import timedelta
 
 
+def get_default_expiration():
+    """Returns a datetime 10 minutes from now — used as default for OTP expiry."""
+    return timezone.now() + timedelta(minutes=10)
+
+
+
 
 class Specialization(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -67,6 +73,11 @@ class Patient(models.Model):
             today = timezone.now().date()
             return today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
         return None
+
+    @property
+    def age(self):
+        """Template-friendly alias for get_age()."""
+        return self.get_age()
 
 
 class Appointment(models.Model):
@@ -232,10 +243,16 @@ class OTPVerification(models.Model):
     otp_type = models.CharField(max_length=10, choices=OTP_TYPE_CHOICES, default='email')
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
+    expires_at = models.DateTimeField(default=get_default_expiration)
     
     def is_expired(self):
         return timezone.now() > self.expires_at
+    
+    def save(self, *args, **kwargs):
+        # Automatically set expiry to 10 minutes from now if not provided
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=10)
+        super().save(*args, **kwargs)
     
     def generate_otp(self):
         self.otp = str(random.randint(100000, 999999))

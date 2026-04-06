@@ -1,0 +1,256 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block coltype %}colMS{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+    <!-- ════════════════════════════════════
+         PENDING APPOINTMENTS DASHBOARD WIDGET
+    ════════════════════════════════════ -->
+    <div id="pending-dashboard-widget" style="margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #0B2B46, #1A4A70);
+                    border-radius: 12px; overflow: hidden;
+                    box-shadow: 0 4px 20px rgba(11,43,70,0.3);">
+
+            <!-- Widget Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center;
+                        padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div style="display:flex; align-items:center; gap: 12px;">
+                    <span style="font-size:28px;">🔔</span>
+                    <div>
+                        <h2 style="color:#fff; margin:0; font-size:20px; font-weight:700;">
+                            Pending Appointments
+                        </h2>
+                        <p style="color:rgba(255,255,255,0.6); margin:0; font-size:13px;">
+                            Appointments waiting for your confirmation
+                        </p>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div id="pending-count-badge" style="background:#FF8C00; color:#fff;
+                        font-size: 36px; font-weight:800; padding: 8px 20px;
+                        border-radius: 50px; min-width: 60px; text-align:center;
+                        line-height:1;">–</div>
+                    <div style="color:rgba(255,255,255,0.5); font-size:11px; margin-top:4px;">
+                        Total Pending
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointment Rows -->
+            <div id="pending-appointments-list" style="padding: 10px 0; min-height: 80px;">
+                <div style="color:rgba(255,255,255,0.5); text-align:center; padding:30px; font-size:14px;">
+                    Loading pending appointments...
+                </div>
+            </div>
+
+            <!-- Widget Footer -->
+            <div style="padding: 14px 24px; border-top: 1px solid rgba(255,255,255,0.1);
+                        display:flex; justify-content:space-between; align-items:center;">
+                <a href="/admin/appointment/appointment/?status__exact=Pending"
+                   style="color:#FF8C00; font-weight:600; font-size:13px; text-decoration:none;">
+                    View All Pending →
+                </a>
+                <span id="last-refreshed" style="color:rgba(255,255,255,0.3); font-size:11px;"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Normal Django Admin App List -->
+    {% if app_list %}
+        {% for app in app_list %}
+        <div class="app-{{ app.app_label }} module{% if app.app_url in request.path|urlencode %} current-app{% endif %}">
+            <table>
+                <caption>
+                    <a href="{{ app.app_url }}" class="section">{{ app.name }}</a>
+                </caption>
+                {% for model in app.models %}
+                <tr class="model-{{ model.object_name|lower }}">
+                    {% if model.admin_url %}
+                    <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
+                    {% else %}
+                    <th scope="row">{{ model.name }}</th>
+                    {% endif %}
+                    <td>
+                        {% if model.add_url %}
+                        <a href="{{ model.add_url }}" class="addlink">{% trans "Add" %}</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if model.admin_url %}
+                        <a href="{{ model.admin_url }}" class="changelink">{% trans "Change" %}</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endfor %}
+    {% else %}
+    <p>{% trans "You don't have permission to view or edit anything." %}</p>
+    {% endif %}
+</div>
+
+<!-- ── Pending Appointments JS ── -->
+<style>
+.appt-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    gap: 12px;
+    transition: background 0.2s;
+}
+.appt-row:hover { background: rgba(255,255,255,0.05); }
+.appt-row:last-child { border-bottom: none; }
+.appt-badge {
+    background: rgba(255,140,0,0.15);
+    color: #FF8C00;
+    border: 1px solid rgba(255,140,0,0.3);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.confirm-btn {
+    background: #FF8C00 !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 7px 16px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    white-space: nowrap;
+    transition: background 0.2s !important;
+}
+.confirm-btn:hover { background: #e07000 !important; }
+.confirm-btn:disabled { background: #28a745 !important; cursor: default !important; }
+.view-btn {
+    color: rgba(255,255,255,0.5) !important;
+    font-size: 12px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.view-btn:hover { color: #fff !important; }
+</style>
+
+<script>
+function loadPendingDashboard() {
+    fetch('/admin/appointment/appointment/pending-count/', {
+        credentials: 'same-origin',
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(r => r.json())
+    .then(data => {
+        // Update badge
+        document.getElementById('pending-count-badge').textContent = data.count;
+
+        // Update timestamp
+        const now = new Date();
+        document.getElementById('last-refreshed').textContent =
+            'Refreshed at ' + now.toLocaleTimeString();
+
+        // Render rows
+        const list = document.getElementById('pending-appointments-list');
+        if (data.count === 0) {
+            list.innerHTML = `
+                <div style="text-align:center; padding:30px; color:rgba(255,255,255,0.4);">
+                    <div style="font-size:36px; margin-bottom:10px;">✅</div>
+                    <div style="font-size:14px; font-weight:600;">All caught up! No pending appointments.</div>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = data.appointments.map(a => `
+            <div class="appt-row" id="appt-row-${a.id}">
+                <span class="appt-badge">Pending</span>
+                <div style="flex:1; min-width:0;">
+                    <div style="color:#fff; font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${a.patient}
+                    </div>
+                    <div style="color:rgba(255,255,255,0.5); font-size:12px;">
+                        ${a.doctor} &bull; ${a.specialization}
+                    </div>
+                </div>
+                <div style="text-align:right; color:rgba(255,255,255,0.6); font-size:13px; white-space:nowrap;">
+                    <div style="font-weight:600; color:#fff;">${a.date}</div>
+                    <div style="font-size:12px;">${a.time}</div>
+                </div>
+                <button class="confirm-btn"
+                        data-id="${a.id}"
+                        data-url="${a.confirm_url}"
+                        onclick="confirmAppointment(this, ${a.id}, '${a.confirm_url}')">
+                    ✅ Confirm
+                </button>
+                <a href="${a.detail_url}" class="view-btn">View</a>
+            </div>
+        `).join('');
+    })
+    .catch(() => {
+        document.getElementById('pending-appointments-list').innerHTML =
+            '<div style="color:rgba(255,80,80,0.7); text-align:center; padding:20px; font-size:13px;">⚠ Could not load appointments.</div>';
+    });
+}
+
+function confirmAppointment(btn, id, url) {
+    btn.disabled = true;
+    btn.textContent = 'Confirming...';
+
+    fetch(url, {
+        credentials: 'same-origin',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            btn.textContent = '✅ Confirmed!';
+            // Fade out the row
+            const row = document.getElementById('appt-row-' + id);
+            row.style.transition = 'opacity 0.5s, max-height 0.5s';
+            row.style.opacity = '0';
+            row.style.overflow = 'hidden';
+            setTimeout(() => {
+                row.style.maxHeight = '0';
+                row.style.padding = '0';
+                setTimeout(() => {
+                    row.remove();
+                    // Update count badge
+                    document.getElementById('pending-count-badge').textContent = data.remaining;
+                    document.getElementById('pending-bar-count').textContent = data.remaining;
+                    if (data.remaining === 0) {
+                        document.getElementById('pending-notification-bar').style.display = 'none';
+                    }
+                }, 500);
+            }, 400);
+        } else {
+            btn.textContent = '⚠ Error';
+            btn.style.background = '#dc3545';
+        }
+    })
+    .catch(() => {
+        btn.textContent = '⚠ Failed';
+        btn.disabled = false;
+    });
+}
+
+function getCookie(name) {
+    let value = `; ${document.cookie}`;
+    let parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+// Load on page ready + auto-refresh every 60 seconds
+document.addEventListener('DOMContentLoaded', loadPendingDashboard);
+setInterval(loadPendingDashboard, 60000);
+</script>
+{% endblock %}
